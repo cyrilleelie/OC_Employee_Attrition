@@ -4,7 +4,7 @@ FROM python:3.12-slim
 # Variables d'environnement pour Python dans Docker
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-ENV HOME=/tmp # <--- AJOUTÉ ICI : Définit un HOME accessible en écriture
+ENV HOME=/tmp
 
 # Définir le répertoire de travail
 WORKDIR /app
