@@ -9,6 +9,14 @@ ENV PYTHONUNBUFFERED 1
 # Définir le répertoire de travail dans le conteneur
 WORKDIR /app
 
+# Mettre à jour la liste des paquets et installer wget et tar
+# -y pour accepter automatiquement
+# --no-install-recommends pour garder l'image petite
+# rm -rf ... pour nettoyer le cache apt et réduire la taille finale
+RUN apt-get update && \
+    apt-get install -y wget tar && \
+    rm -rf /var/lib/apt/lists/*
+
 # Copier UNIQUEMENT le fichier requirements.txt pour profiter du cache Docker
 # Si requirements.txt ne change pas, Docker n'exécutera pas l'étape RUN suivante lors des builds ultérieurs
 COPY requirements.txt .
