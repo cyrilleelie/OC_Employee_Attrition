@@ -33,8 +33,8 @@ COPY ./src /app/src
 # Ne copiez le dossier models que s'il contient des modèles pré-entraînés que vous voulez inclure dans l'image
 # Si les modèles sont générés par train_model.py, ils seront sauvegardés dans /app/models créé ci-dessus.
 # S'ils sont dans votre repo et que vous voulez les inclure, décommentez la ligne suivante et assurez-vous des permissions
-# COPY ./models /app/models
-# RUN chown -R 1000:1000 /app/models # Assurer les droits si modèles copiés
+COPY ./models /app/models
+RUN chown -R 1000:1000 /app/models
 
 # Exposer le port
 EXPOSE 8000
