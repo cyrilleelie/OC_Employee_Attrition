@@ -35,6 +35,8 @@ poetry-plugin-export = ">=1.8" # Ou la version que vous préférez/installez
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
 pytest-cov = "^6.1.1"
+black = "^25.1.0"
+ruff = "^0.11.11"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
