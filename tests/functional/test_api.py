@@ -94,3 +94,10 @@ def test_predict_bulk_empty_list():
     """Teste /predict_bulk avec une liste d'employés vide."""
     response = client.post("/predict_bulk", json={"employees": []})
     assert response.status_code == 400 # Bad Request (ou comme géré par votre API)
+
+@patch("src.api.main.load_prediction_pipeline", return_value=None) # Simule un échec de chargement du modèle
+def test_predict_single_model_not_loaded_api(mock_load_pipeline):
+    """Teste POST /predict lorsque le modèle n'est pas chargé (simulé)."""
+    response = client.post("/predict", json=VALID_EMPLOYEE_DATA)
+    assert response.status_code == 503 # Service Unavailable
+    assert response.json() == {"detail": "Le modèle n'est pas chargé. Veuillez réessayer plus tard ou contacter un administrateur."}
