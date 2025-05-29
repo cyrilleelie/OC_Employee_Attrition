@@ -130,9 +130,6 @@ def run_preprocessing_pipeline(df: pd.DataFrame,
     y = df_featured[config.TARGET_VARIABLE]
     X = df_featured.drop(config.TARGET_VARIABLE, axis=1)
 
-    print(f"SAMPLE1 = {X.sample(n=1).iloc[0].to_dict()}")
-    print(f"SAMPLE2 = {X.sample(n=1).iloc[0].to_dict()}")
-
     mapped_binary_cols = list(binary_cols_map.keys()) if binary_cols_map else []
     ordinal_to_encode = list(ordinal_cols_categories.keys()) if ordinal_cols_categories else []
 
