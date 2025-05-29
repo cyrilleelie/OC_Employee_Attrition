@@ -1,6 +1,5 @@
 import pandas as pd
 import pytest  # pytest est implicitement utilisé mais l'import est une bonne pratique
-import numpy as np  # Pour pd.NA et les types numériques
 
 # Importez les fonctions que vous voulez tester
 from src.data_processing.preprocess import map_binary_features, clean_data

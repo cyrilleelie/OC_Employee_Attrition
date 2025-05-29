@@ -184,7 +184,6 @@ def run_preprocessing_pipeline(
     y = df_featured[config.TARGET_VARIABLE]
     X = df_featured.drop(config.TARGET_VARIABLE, axis=1)
 
-    mapped_binary_cols = list(binary_cols_map.keys()) if binary_cols_map else []
     ordinal_to_encode = (
         list(ordinal_cols_categories.keys()) if ordinal_cols_categories else []
     )
@@ -291,7 +290,7 @@ if __name__ == "__main__":
                 print(f"Colonne 'heure_supplementaires' traitée (scalée) : {hs_col[0]}")
 
         except Exception as e:
-            print(f"\n--- Erreur lors du preprocessing ---")
+            print("\n--- Erreur lors du preprocessing ---")
             print(e)
             import traceback
 

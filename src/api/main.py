@@ -1,7 +1,6 @@
 from fastapi import FastAPI, HTTPException, status
 import pandas as pd
 import logging
-from typing import List
 from contextlib import asynccontextmanager  # AJOUTÉ
 
 from .schemas import (

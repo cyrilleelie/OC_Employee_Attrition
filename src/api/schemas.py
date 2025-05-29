@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional, Union
+from typing import List, Union
 
 
 # IMPORTANT : Ce modèle doit contenir TOUTES les features

@@ -1,4 +1,3 @@
-import pandas as pd
 import numpy as np
 from joblib import dump
 import logging
@@ -9,7 +8,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.metrics import (
     classification_report,
     fbeta_score,
-    make_scorer,
     confusion_matrix,
 )
 
@@ -124,7 +122,6 @@ def train_and_evaluate_pipeline():
     # --- 11. Évaluer la Pipeline (sur X_test, y_test) ---
     logger.info("\n--- Évaluation sur le jeu de Test ---")
     y_pred = full_pipeline.predict(X_test)
-    y_pred_proba = full_pipeline.predict_proba(X_test)[:, 1]  # Probas pour la classe 1
 
     print("\nMatrice de Confusion :\n", confusion_matrix(y_test, y_pred))
     print(

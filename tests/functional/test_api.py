@@ -1,7 +1,5 @@
 from fastapi.testclient import TestClient
 from src.api.main import app  # Importez votre application FastAPI
-from src.api.schemas import EmployeeInput  # Pour créer des données d'exemple
-import pandas as pd
 from unittest.mock import patch  # Pour mocker la fonction de prédiction
 
 # Initialiser le TestClient
