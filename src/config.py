@@ -14,10 +14,10 @@ RAW_EVAL_PATH = DATA_DIR / "raw" / "extrait_eval.csv"
 RAW_SONDAGE_PATH = DATA_DIR / "raw" / "extrait_sondage.csv"
 PROCESSED_DATA_PATH = DATA_DIR / "processed" / "data_rh_final.csv"
 
-MODEL_NAME = "attrition_logistic_regression.joblib" # Ou le nom correct
+MODEL_NAME = "attrition_logistic_regression.joblib"  # Ou le nom correct
 MODEL_PATH = MODELS_DIR / MODEL_NAME
 
-TARGET_VARIABLE = 'a_quitte_l_entreprise_numeric'
+TARGET_VARIABLE = "a_quitte_l_entreprise_numeric"
 
 DB_USER = os.getenv("POSTGRES_USER", "default_user")
 DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "default_password")
