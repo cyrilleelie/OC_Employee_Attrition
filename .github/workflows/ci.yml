@@ -47,7 +47,7 @@ jobs:
     - name: Installation des dépendances avec Poetry
       # Ne réinstalle que si le cache n'a pas été trouvé ou si poetry.lock a changé
       # S'exécute aussi si le cache a été trouvé mais que .venv n'existe pas
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true' || ! देखिन्छ('.venv')
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
       run: poetry install --no-interaction --no-root # Installe toutes les dépendances, y compris dev
 
     - name: Linter et Formatteur (Black & Ruff)
