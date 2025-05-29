@@ -1,0 +1,72 @@
+name: Python Application CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest # Utiliser la dernière version d'Ubuntu disponible
+
+    strategy:
+      matrix:
+        python-version: ["3.12"] # Spécifiez la version de Python de votre projet
+
+    steps:
+    - name: Checkout du code
+      uses: actions/checkout@v4 # Action pour récupérer votre code
+
+    - name: Mise en place de Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Installation de Poetry
+      uses: snok/install-poetry@v1 # Action pour installer Poetry
+      with:
+        version: "latest" # ou une version spécifique si besoin
+        virtualenvs-create: true # Crée l'env virtuel
+        virtualenvs-in-project: true # Crée .venv dans le projet, plus facile à mettre en cache
+        installer-parallel: true
+
+    - name: Chargement du cache des dépendances Poetry
+      id: cached-poetry-dependencies
+      uses: actions/cache@v4
+      with:
+        path: .venv # Chemin du dossier .venv
+        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-poetry-
+
+    - name: Installation des dépendances avec Poetry
+      # Ne réinstalle que si le cache n'a pas été trouvé ou si poetry.lock a changé
+      # S'exécute aussi si le cache a été trouvé mais que .venv n'existe pas
+      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction --no-root # Installe toutes les dépendances, y compris dev
+
+    - name: Linter et Formatteur (Black & Ruff)
+      run: |
+        poetry run black --check .
+        poetry run ruff check .
+      continue-on-error: true # Optionnel: pour ne pas bloquer la CI si le linting échoue au début
+
+    - name: Exécution des tests avec Pytest et couverture
+      run: |
+        poetry run pytest --cov=src --cov-report=xml --cov-report=term-missing tests/
+        # --cov-report=xml est utile si vous voulez uploader vers Codecov plus tard
+        # --cov-report=term-missing montre les lignes non couvertes dans le log
+
+    # Optionnel : Uploader le rapport de couverture comme un artefact
+    # Utile pour le consulter ou pour des services externes comme Codecov
+    - name: Uploader le rapport de couverture
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report-${{ matrix.python-version }}
+        path: coverage.xml # Le fichier généré par --cov-report=xml
+        if-no-files-found: ignore # Ne pas échouer si le fichier n'est pas trouvé
