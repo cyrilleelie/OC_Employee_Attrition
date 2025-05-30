@@ -11,7 +11,8 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 
-from src.data_processing.load_data import load_and_merge_csvs
+from src.data_processing.load_data import get_data
+# from src.data_processing.load_data import load_and_merge_csvs
 from src.data_processing.preprocess import (
     clean_data,
     map_binary_features,
@@ -34,27 +35,16 @@ def train_and_evaluate_pipeline():
     logger.info(">>> Début du processus d'entraînement et d'évaluation <<<")
 
     # --- 1. Charger les données ---
-    df_raw = load_and_merge_csvs()
-    if df_raw is None:
-        logger.error("Arrêt : Impossible de charger les données.")
+    # df_raw = load_and_merge_csvs()
+    df_featured = get_data(source="postgres")
+    if df_featured is None:
+        logger.error("Arrêt : Impossible de charger les données ou DataFrame vide.")
         return
 
-    # --- 2. Définir les mappings et catégories (CRUCIAL : Doit être cohérent avec preprocess.py) ---
-    # Ces dictionnaires définissent COMMENT traiter vos features.
-    binary_features_mapping = {
-        "genre": {"M": 0, "F": 1},
-        "heure_supplementaires": {"Non": 0, "Oui": 1},
-    }
-    ordinal_features_categories = {
-        "frequence_deplacement": ["Aucun", "Occasionnel", "Frequent"],
-        # Ajoutez vos autres colonnes ordinales ici
-    }
-    # --- FIN DÉFINITION ---
-
     # --- 3. Appliquer les transformations "sûres" (avant split) ---
-    df_cleaned = clean_data(df_raw)
-    df_mapped = map_binary_features(df_cleaned, binary_features_mapping)
-    df_featured = create_features(df_mapped)
+    # df_cleaned = clean_data(df_raw)
+    # df_mapped = map_binary_features(df_cleaned, config.BINARY_FEATURES_MAPPING)
+    # df_featured = create_features(df_mapped)
 
     # --- 4. Séparer X et y ---
     if config.TARGET_VARIABLE not in df_featured.columns:
@@ -81,7 +71,7 @@ def train_and_evaluate_pipeline():
     potential_numerical_cols = X_train.select_dtypes(
         include=[np.number]
     ).columns.tolist()
-    ordinal_to_encode = list(ordinal_features_categories.keys())
+    ordinal_to_encode = list(config.ORDINAL_FEATURES_CATEGORIES.keys())
     numerical_to_scale = [
         col for col in potential_numerical_cols if col not in ordinal_to_encode
     ]
@@ -94,7 +84,7 @@ def train_and_evaluate_pipeline():
         numerical_cols=numerical_to_scale,
         onehot_cols=onehot_to_encode,
         ordinal_cols=ordinal_to_encode,
-        ordinal_categories=ordinal_features_categories,
+        ordinal_categories=config.ORDINAL_FEATURES_CATEGORIES,
     )
 
     # --- 8. Définir le modèle ---

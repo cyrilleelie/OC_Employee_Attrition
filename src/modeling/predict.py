@@ -18,15 +18,6 @@ logger = logging.getLogger(__name__)
 
 _pipeline = None
 
-# --- IMPORTANT : Définir les mappings ICI, de manière cohérente avec train_model.py ---
-# Idéalement, cela viendrait d'un fichier de configuration ou serait sauvegardé
-# avec la pipeline, mais pour l'instant, nous les dupliquons pour la clarté.
-BINARY_FEATURES_MAPPING = {
-    "genre": {"M": 0, "F": 1},
-    "heure_supplementaires": {"Non": 0, "Oui": 1},
-}
-# Nous n'avons pas besoin des catégories ordinales ici, car l'OrdinalEncoder
-# est DANS la pipeline et a déjà "appris" les catégories.
 # --- FIN DÉFINITION ---
 
 
@@ -74,7 +65,7 @@ def predict_attrition(input_data: pd.DataFrame) -> Union[List[Dict], Dict]:
             input_data["a_quitte_l_entreprise"] = "Non"  # Valeur arbitraire
 
         df_cleaned = clean_data(input_data)
-        df_mapped = map_binary_features(df_cleaned, BINARY_FEATURES_MAPPING)
+        df_mapped = map_binary_features(df_cleaned, config.BINARY_FEATURES_MAPPING)
         df_featured = create_features(df_mapped)
 
         # Enlever la colonne cible si on l'a ajoutée ou si elle était là
