@@ -187,3 +187,18 @@ Les appels à `/predict` et `/predict_bulk` sont enregistrés dans la table `api
 Pour lancer la suite de tests (unitaires et fonctionnels) :
 ```bash
 poetry run pytest
+```
+
+## 🗣️ Exemples d'Utilisation de l'API
+
+L'API peut être testée interactivement via l'interface Swagger UI disponible à l'endpoint `/docs` lorsque le serveur API est lancé.
+
+Pour des exemples de code permettant d'interagir avec l'API par programmation en utilisant `curl` (ligne de commande) ou Python (avec la librairie `requests`), veuillez consulter le document suivant :
+
+➡️ **[Exemples d'Utilisation de l'API](./docs/API_USAGE_EXAMPLES.md)**
+
+Voici un test rapide pour vérifier que l'API est en ligne (nécessite que l'API tourne sur `http://127.0.0.1:8000` et que `curl` soit installé) :
+
+```bash
+curl -X GET "[http://127.0.0.1:8000/](http://127.0.0.1:8000/)"
+```
