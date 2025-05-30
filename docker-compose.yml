@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:15-alpine # Utilisez une version récente de Postgres
+    container_name: postgres_attrition
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${DB_HOST_PORT:-5432}:5432" # Mappe le port du conteneur au port de votre machine
+    volumes:
+      - postgres_data_attrition:/var/lib/postgresql/data
+
+volumes:
+  postgres_data_attrition:

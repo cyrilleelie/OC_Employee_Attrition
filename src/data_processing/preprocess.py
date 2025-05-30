@@ -255,24 +255,12 @@ if __name__ == "__main__":
     df_raw = load_and_merge_csvs()
 
     if df_raw is not None:
-        # --- CONFIGURATION SPÉCIFIQUE À VOS DONNÉES (À ADAPTER ABSOLUMENT) ---
-        binary_features_mapping = {
-            "genre": {"M": 0, "F": 1},  # Adaptez si 'Masculin'/'Féminin' etc.
-            "heure_supplementaires": {
-                "Non": 0,
-                "Oui": 1,
-            },  # <-- AJOUTÉ ICI ! Adaptez 'Non'/'Oui' si nécessaire.
-        }
-        ordinal_features_categories = {
-            "frequence_deplacement": ["Aucun", "Occasionnel", "Frequent"],
-        }
-        # --- FIN CONFIGURATION SPÉCIFIQUE ---
 
         try:
             X_p, y_p, proc = run_preprocessing_pipeline(
                 df_raw,
-                binary_cols_map=binary_features_mapping,
-                ordinal_cols_categories=ordinal_features_categories,
+                binary_cols_map=config.BINARY_FEATURES_MAPPING,
+                ordinal_cols_categories=config.ORDINAL_FEATURES_CATEGORIES,
                 fit=True,
             )
             print("\n--- Preprocessing Réussi ---")
