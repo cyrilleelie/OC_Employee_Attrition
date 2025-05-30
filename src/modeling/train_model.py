@@ -36,21 +36,24 @@ def train_and_evaluate_pipeline():
 
     # --- 1. Charger les données ---
     # df_raw = load_and_merge_csvs()
-    df_featured = get_data(source="postgres")
-    if df_featured is None:
+    df_loaded = get_data(source="postgres")
+    if df_loaded is None or df_loaded.empty:
         logger.error("Arrêt : Impossible de charger les données ou DataFrame vide.")
         return
 
-    # --- 3. Appliquer les transformations "sûres" (avant split) ---
+    # --- 3. Appliquer les transformations "sûres" (avant split) --- PAS BESOIN SI DEJA FAIT DANS populate_db
     # df_cleaned = clean_data(df_raw)
     # df_mapped = map_binary_features(df_cleaned, config.BINARY_FEATURES_MAPPING)
-    # df_featured = create_features(df_mapped)
+    df_featured = create_features(df_loaded) # Assurez-vous que df_featured est bien défini
 
-    df_for_training = df_featured.copy() # Ou df_featured si vous avez create_features
+    if df_featured.empty: # Vérifier après create_features (ou sur df_loaded si create_features ne fait rien)
+        logger.error("Arrêt : DataFrame vide après chargement/création de features.")
+        return
 
-    # --- 3. Séparer X et y ET SUPPRIMER LES COLONNES NON-FEATURES DE X ---
-    if config.TARGET_VARIABLE not in df_for_training.columns:
-         raise ValueError(f"La colonne cible '{config.TARGET_VARIABLE}' n'est pas présente.")
+    df_for_training = df_featured.copy() 
+
+    if config.TARGET_VARIABLE not in df_for_training.columns: # CETTE VERIFICATION EST MAINTENANT APRES LE CHECK EMPTY
+        raise ValueError(f"La colonne cible '{config.TARGET_VARIABLE}' n'est pas présente.")
     
     y = df_for_training[config.TARGET_VARIABLE]
     X = df_for_training.drop(config.TARGET_VARIABLE, axis=1)
