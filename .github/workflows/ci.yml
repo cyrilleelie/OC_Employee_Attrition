@@ -57,10 +57,7 @@ jobs:
       continue-on-error: true # Optionnel: pour ne pas bloquer la CI si le linting échoue au début
 
     - name: Exécution des tests avec Pytest et couverture
-      run: |
-        poetry run pytest --cov=src --cov-report=xml --cov-report=term-missing tests/
-        # --cov-report=xml est utile si vous voulez uploader vers Codecov plus tard
-        # --cov-report=term-missing montre les lignes non couvertes dans le log
+      run: poetry run pytest --cov=src --cov-report=xml --cov-report=term-missing --cov-fail-under=70 tests
 
     # Optionnel : Uploader le rapport de couverture comme un artefact
     # Utile pour le consulter ou pour des services externes comme Codecov
@@ -70,3 +67,7 @@ jobs:
         name: coverage-report-${{ matrix.python-version }}
         path: coverage.xml # Le fichier généré par --cov-report=xml
         if-no-files-found: ignore # Ne pas échouer si le fichier n'est pas trouvé
+
+    - name: Construire l'image Docker
+      run: docker build -t mon-api-attrition-ci-test .
+      # Le tag (-t) est juste pour le test du build, l'image n'est pas poussée.

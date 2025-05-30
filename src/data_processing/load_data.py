@@ -77,24 +77,33 @@ def load_and_merge_csvs():
 
         logger.info("Préparation de la clé de jointure dans df_eval...")
         if 'eval_number' in df_eval.columns:
-            df_eval['id_employee_str'] = df_eval['eval_number'].str.split('_').str[1]
-            df_eval['id_employee'] = pd.to_numeric(df_eval['id_employee_str'], errors='coerce')
-            nan_count = df_eval['id_employee'].isnull().sum()
+            # S'assurer que eval_number est traité comme string avant split
+            df_eval['id_employee_str_temp'] = df_eval['eval_number'].astype(str).str.split('_').str[1]
+            
+            # Tenter une conversion numérique pour valider le format si nécessaire,
+            # mais la clé finale pour la jointure sera une string.
+            numeric_ids_for_check = pd.to_numeric(df_eval['id_employee_str_temp'], errors='coerce')
+            nan_count = numeric_ids_for_check.isnull().sum()
             if nan_count > 0:
-                logger.warning(f"{nan_count} 'eval_number' n'ont pas pu être convertis en 'id_employee' valides.")
-            df_eval['id_employee'] = df_eval['id_employee'].astype('object') # Garder en object pour correspondre à String(255)
-            df_eval = df_eval.drop(columns=['id_employee_str'])
+                # Le message exact attendu par votre test est important ici
+                logger.warning(f"{nan_count} 'eval_number' n'ont pas pu être convertis en 'id_employee' valides.") # Message original
+
+            # La clé de jointure finale doit être une string
+            df_eval['id_employee'] = df_eval['id_employee_str_temp'].astype(str) # Assurer le type string
+            df_eval = df_eval.drop(columns=['id_employee_str_temp'])
+            logger.info("'id_employee' créé et formaté en string dans df_eval.")
         else:
             logger.error("La colonne 'eval_number' est introuvable dans df_eval.")
             return None
 
+        # S'assurer que les id_employee dans les autres tables sont aussi des strings
         for df_temp, name in [(df_sirh, 'df_sirh'), (df_sondage, 'df_sondage')]:
             if 'id_employee' in df_temp.columns:
-                 df_temp['id_employee'] = df_temp['id_employee'].astype('object')
+                df_temp['id_employee'] = df_temp['id_employee'].astype(str) # Assurer le type string
             else:
                 logger.error(f"La colonne 'id_employee' est introuvable dans {name}.")
                 return None
-
+        
         logger.info("Fusion des DataFrames...")
         df_merged = pd.merge(df_sirh, df_eval, on='id_employee', how='left')
         df_merged = pd.merge(df_merged, df_sondage, on='id_employee', how='left')
