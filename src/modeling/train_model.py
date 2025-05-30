@@ -46,14 +46,29 @@ def train_and_evaluate_pipeline():
     # df_mapped = map_binary_features(df_cleaned, config.BINARY_FEATURES_MAPPING)
     # df_featured = create_features(df_mapped)
 
-    # --- 4. Séparer X et y ---
-    if config.TARGET_VARIABLE not in df_featured.columns:
-        raise ValueError(
-            f"La colonne cible '{config.TARGET_VARIABLE}' n'est pas présente."
-        )
-    y = df_featured[config.TARGET_VARIABLE]
-    X = df_featured.drop(config.TARGET_VARIABLE, axis=1)
+    df_for_training = df_featured.copy() # Ou df_featured si vous avez create_features
 
+    # --- 3. Séparer X et y ET SUPPRIMER LES COLONNES NON-FEATURES DE X ---
+    if config.TARGET_VARIABLE not in df_for_training.columns:
+         raise ValueError(f"La colonne cible '{config.TARGET_VARIABLE}' n'est pas présente.")
+    
+    y = df_for_training[config.TARGET_VARIABLE]
+    X = df_for_training.drop(config.TARGET_VARIABLE, axis=1)
+
+    # Colonnes à exclure de X car ce ne sont pas des features pour le modèle
+    # mais des identifiants ou des métadonnées de la BDD
+    cols_to_exclude_from_features = [
+        config.TARGET_VARIABLE, 
+        'a_quitte_l_entreprise', # La version texte de la cible, si elle est encore là
+        'id_employee',
+        'date_creation_enregistrement', # Si elle vient de la BDD
+        'date_derniere_modification'  # Si elle vient de la BDD
+        # Ajoutez toute autre colonne qui ne doit pas être une feature
+    ]
+ 
+    X = df_for_training.drop(columns=[col for col in cols_to_exclude_from_features if col in df_for_training.columns], errors='ignore')
+    logger.info(f"Colonnes dans X avant train_test_split (après exclusion): {X.columns.tolist()}")
+    
     # --- 5. Séparer en Train / Test ---
     logger.info("Séparation des données en ensembles d'entraînement et de test...")
     X_train, X_test, y_train, y_test = train_test_split(
