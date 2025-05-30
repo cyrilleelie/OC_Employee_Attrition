@@ -202,3 +202,36 @@ Voici un test rapide pour vérifier que l'API est en ligne (nécessite que l'API
 ```bash
 curl -X GET "[http://127.0.0.1:8000/](http://127.0.0.1:8000/)"
 ```
+
+## 🛠️ Maintenance et Protocole de Mise à Jour
+
+Pour assurer la pertinence et la performance continue de ce modèle de prédiction d'attrition, le protocole de mise à jour suivant est envisagé :
+
+1.  **Surveillance des Performances :**
+    * Les prédictions de l'API étant enregistrées dans la table `api_prediction_logs`, il sera possible (avec un outillage futur) de comparer ces prédictions aux départs réels observés pour évaluer la performance du modèle en continu.
+    * Une baisse significative des métriques clés (ex: F2-score, rappel pour la classe "départ") indiquera un besoin de ré-évaluation.
+
+2.  **Ré-entraînement du Modèle :**
+    * **Fréquence :** Un ré-entraînement est à envisager :
+        * Périodiquement (ex: tous les 6 mois ou annuellement) avec les données les plus récentes de la table `employees`.
+        * Lorsque de nouvelles features pertinentes sont identifiées et ajoutées.
+        * Si une dérive significative des données d'entrée est détectée.
+        * Si les performances du modèle en production baissent en dessous d'un seuil acceptable.
+    * **Procédure :** Le script `src/modeling/train_model.py` est utilisé pour le ré-entraînement. Le nouveau modèle sauvegardé devra ensuite être redéployé.
+
+3.  **Mise à Jour des Données d'Entraînement :**
+    * Un processus régulier (à définir) pour mettre à jour la table `employees` avec les données RH les plus récentes est nécessaire pour que les ré-entraînements soient basés sur des informations à jour. Cela pourrait impliquer de relancer périodiquement une version adaptée de `scripts/populate_employees_table.py` ou un pipeline ETL plus robuste.
+
+4.  **Revue des Features :**
+    * Périodiquement, il est bon de revoir la pertinence des features utilisées et d'explorer si de nouvelles données disponibles pourraient améliorer le modèle.
+
+5.  **Mise à Jour des Dépendances :**
+    * Les dépendances du projet (Python, librairies) doivent être mises à jour régulièrement pour des raisons de sécurité et pour bénéficier des dernières améliorations.
+    * Utiliser `poetry show --outdated` pour identifier les dépendances obsolètes.
+    * Mettre à jour avec `poetry update <nom_librairie>` ou `poetry update`.
+    * **Crucial :** Après une mise à jour des dépendances, relancer l'intégralité des tests et potentiellement un ré-entraînement/évaluation pour s'assurer de la non-régression.
+
+6.  **Documentation :**
+    * Toute modification significative du modèle, des features, de l'architecture, ou du processus de ré-entraînement doit être reflétée dans cette documentation.
+
+Ce protocole initial servira de base et pourra être affiné avec le temps et l'expérience acquise sur le modèle en production (ou en simulation de production).
