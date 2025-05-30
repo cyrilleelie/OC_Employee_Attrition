@@ -114,5 +114,5 @@ def test_predict_single_model_not_loaded_api(mock_load_pipeline):
     response = client.post("/predict", json=VALID_EMPLOYEE_DATA)
     assert response.status_code == 503  # Service Unavailable
     assert response.json() == {
-        "detail": "Le modèle n'est pas chargé. Veuillez réessayer plus tard ou contacter un administrateur."
+        "detail": "Le modèle n'est pas chargé."
     }
