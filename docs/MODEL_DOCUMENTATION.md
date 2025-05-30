@@ -82,17 +82,15 @@ Les performances du modèle sont évaluées sur un jeu de test mis de côté (20
 * **Rapport de Classification :**
     ```
     # Exemple
-               precision    recall  f1-score   support
+                  precision    recall  f1-score   support
 
-         Non       0.94      0.79      0.85       247
-         Oui       0.39      0.72      0.51        47
+             Non       0.94      0.79      0.85       247
+             Oui       0.39      0.72      0.51        47
 
-    accuracy                           0.78       294
-   macro avg       0.66      0.75      0.68       294
-weighted avg       0.85      0.78      0.80       294
+        accuracy                           0.78       294
+       macro avg       0.66      0.75      0.68       294
+    weighted avg       0.85      0.78      0.80       294
     ```
-* **F2-Score (privilégie le Rappel pour la classe positive 'Oui') :**
-    * `0.XX`
 
 ## 7. Procédure de Ré-entraînement
 
