@@ -35,43 +35,60 @@ Ce projet a pour objectif d'analyser les données RH afin de construire un modè
 ## 📂 Structure du Projet
 
 Le projet est organisé de la manière suivante :
-    ```
-    mon_projet_attrition/
-    │
-    ├── .github/
-    │   └── workflows/
-    │       └── ci.yml          # Workflow d'Intégration Continue
-    ├── .gitignore
-    ├── README.md               # Ce fichier
-    ├── pyproject.toml          # Dépendances et configuration Poetry
-    ├── poetry.lock
-    ├── requirements.txt        # Export pour Docker/HF
-    ├── Dockerfile              # Fichier de build Docker pour l'API
-    ├── docker-compose.yml      # Pour lancer PostgreSQL localement
-    ├── .env.example            # Fichier d'exemple pour les variables d'environnement
-    │
-    ├── data/
-    │   └── raw/                # Données brutes CSV (source initiale)
-    │
-    ├── notebooks/              # Notebooks d'exploration et de tests initiaux
-    │
-    ├── src/
-    │   ├── init.py
-    │   ├── api/                # Code de l'API FastAPI (main.py, schemas.py)
-    │   ├── config.py           # Configurations globales (chemins, params, mappings)
-    │   ├── data_processing/    # Modules de chargement et preprocessing
-    │   ├── database/           # Modules liés à la base de données (setup, models, init_db)
-    │   └── modeling/           # Modules d'entraînement et prédiction du modèle
-    │
-    ├── models/                 # Modèles ML entraînés (ex: .joblib)
-    │
-    ├── scripts/                # Scripts utilitaires (ex: peuplement de la BDD)
-    │   └── populate_employees_table.py
-    │
-    └── tests/
-    ├── unit/               # Tests unitaires
-    └── functional/         # Tests fonctionnels/API
-    ```
+
+```text
+mon_projet_attrition/
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── .gitignore
+├── .env.example
+├── Dockerfile
+├── README.md
+├── docker-compose.yml
+├── poetry.lock
+├── pyproject.toml
+├── requirements.txt
+├── data/
+│   └── raw/
+        ├── extrait_sirh.csv
+        ├── extrait_eval.csv
+│       └── extrait_sondage.csv
+├── models/
+│   └── attrition_model.joblib
+├── notebooks/
+│   └── (vos notebooks ici, ex: 01_exploration.ipynb)
+├── scripts/
+│   └── populate_employees_table.py
+├── src/
+│   ├── __init__.py
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── main.py
+│   │   └── schemas.py
+│   ├── config.py
+│   ├── data_processing/
+│   │   ├── __init__.py
+│   │   ├── load_data.py
+│   │   └── preprocess.py
+│   ├── database/
+│   │   ├── __init__.py
+│   │   ├── database_setup.py
+│   │   ├── init_db.py
+│   │   └── models.py
+│   └── modeling/
+│       ├── __init__.py
+│       ├── predict.py
+│       └── train_model.py
+└── tests/
+    ├── __init__.py
+    ├── functional/
+    │   ├── __init__.py
+    │   └── test_api.py
+    └── unit/
+        ├── __init__.py
+        └── test_preprocess.py
+```
 
 ## 🚀 Installation et Configuration Locale
 
