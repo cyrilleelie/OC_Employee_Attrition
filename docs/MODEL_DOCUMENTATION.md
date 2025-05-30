@@ -150,7 +150,7 @@ Le projet est structuré autour de plusieurs composants clés qui interagissent 
 
 *(Optionnel : Vous pourriez insérer ici un schéma simplifié si vous en avez un, même textuel, ou un lien vers une image hébergée)*
 
-## 10. Justification des Choix Techniques (Ajoutez à MODEL_DOCUMENTATION.md ou nouveau fichier)
+## 10. Justification des Choix Techniques
 
 Les principaux choix technologiques pour ce projet ont été faits pour répondre aux besoins de développement, de déploiement et de maintenabilité :
 
