@@ -1,6 +1,9 @@
 from fastapi.testclient import TestClient
 from src.api.main import app  # Importez votre application FastAPI
-from unittest.mock import patch  # Pour mocker la fonction de prédiction
+from unittest.mock import patch, MagicMock  # Pour mocker la fonction de prédiction
+
+# Importe les configurations globales du projet
+from src import config
 
 # Initialiser le TestClient
 client = TestClient(app)
@@ -45,9 +48,8 @@ def test_read_root():
     """Teste l'endpoint racine /."""
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {
-        "message": "Bienvenue sur l'API de Prédiction d'Attrition RH - v0.1.0. Accédez à /docs pour la documentation."
-    }  # Adaptez
+    expected_message = f"Bienvenue sur l'{config.API_TITLE} - v{config.API_VERSION}. Accédez à /docs pour la documentation interactive."
+    assert response.json() == {"message": expected_message}
 
 
 @patch("src.api.main.predict_attrition", return_value=MOCK_PREDICTION_OUTPUT)
@@ -114,5 +116,93 @@ def test_predict_single_model_not_loaded_api(mock_load_pipeline):
     response = client.post("/predict", json=VALID_EMPLOYEE_DATA)
     assert response.status_code == 503  # Service Unavailable
     assert response.json() == {
-        "detail": "Le modèle n'est pas chargé."
+        "detail": "Modèle de prédiction non disponible. Veuillez réessayer plus tard."
     }
+
+
+@patch(
+    "src.api.main.load_prediction_pipeline", return_value=MagicMock()
+)  # Assurer que la pipeline semble chargée
+@patch(
+    "src.api.main.predict_attrition",
+    return_value={"error": "Erreur interne de prédiction simulée"},
+)
+def test_predict_single_error_from_predict_attrition(mock_predict, mock_load_pipeline):
+    """Teste /predict quand predict_attrition retourne une erreur."""
+    response = client.post("/predict", json=VALID_EMPLOYEE_DATA)
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Erreur interne de prédiction simulée"}
+    mock_predict.assert_called_once()
+
+
+@patch("src.api.main.load_prediction_pipeline", return_value=MagicMock())
+@patch(
+    "src.api.main.predict_attrition", return_value=[]
+)  # predict_attrition retourne une liste vide
+def test_predict_single_empty_list_from_predict_attrition(
+    mock_predict, mock_load_pipeline
+):
+    """Teste /predict quand predict_attrition retourne une liste vide (inattendu)."""
+    response = client.post("/predict", json=VALID_EMPLOYEE_DATA)
+    assert response.status_code == 500
+    assert response.json() == {
+        "detail": "La prédiction a échoué à produire un résultat."
+    }
+    mock_predict.assert_called_once()
+
+
+# Tests similaires pour /predict_bulk
+@patch("src.api.main.load_prediction_pipeline", return_value=MagicMock())
+@patch("src.api.main.predict_attrition", return_value={"error": "Erreur bulk simulée"})
+def test_predict_bulk_error_from_predict_attrition(
+    mock_predict_bulk, mock_load_pipeline
+):
+    """Teste /predict_bulk quand predict_attrition retourne une erreur."""
+    bulk_data = {"employees": [VALID_EMPLOYEE_DATA]}
+    response = client.post("/predict_bulk", json=bulk_data)
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Erreur bulk simulée"}
+    mock_predict_bulk.assert_called_once()
+
+
+@patch("src.api.main.load_prediction_pipeline", return_value=MagicMock())
+@patch(
+    "src.api.main.predict_attrition", return_value=[MOCK_PREDICTION_OUTPUT[0]]
+)  # Retourne 1 résultat au lieu de 2
+def test_predict_bulk_wrong_results_count_from_predict_attrition(
+    mock_predict_bulk, mock_load_pipeline
+):
+    """Teste /predict_bulk quand predict_attrition ne retourne pas le bon nombre de résultats."""
+    bulk_data = {
+        "employees": [VALID_EMPLOYEE_DATA, VALID_EMPLOYEE_DATA]
+    }  # Attend 2 résultats
+    response = client.post("/predict_bulk", json=bulk_data)
+    assert response.status_code == 500
+    assert response.json() == {
+        "detail": "La prédiction en masse a échoué ou un nombre incorrect de résultats a été retourné."
+    }
+    mock_predict_bulk.assert_called_once()
+
+
+def test_predict_single_invalid_enum_value_genre():
+    """Teste /predict avec une valeur non autorisée pour un champ Enum (genre)."""
+    invalid_data = VALID_EMPLOYEE_DATA.copy()
+    invalid_data["genre"] = (
+        "Autre"  # Supposons que "Autre" n'est pas dans votre Enum/liste autorisée
+    )
+
+    response = client.post("/predict", json=invalid_data)
+    assert (
+        response.status_code == 422
+    )  # Pydantic devrait lever une erreur de validation
+    json_response = response.json()
+    assert "detail" in json_response
+    # Vérifier que le message d'erreur mentionne 'genre'
+    error_found = False
+    for error in json_response.get("detail", []):
+        if "genre" in error.get("loc", []):
+            error_found = True
+            break
+    assert (
+        error_found
+    ), "Le message d'erreur de validation ne mentionne pas le champ 'genre'."

@@ -1,141 +1,215 @@
+"""
+Module pour charger la pipeline de Machine Learning entraînée et effectuer des prédictions.
+
+Fonctions principales :
+- `load_prediction_pipeline()`: Charge la pipeline Scikit-learn sauvegardée (modèle + préprocesseur).
+- `predict_attrition()`: Prend des données brutes d'employés en entrée (DataFrame),
+  applique les transformations de preprocessing initiales, puis utilise la pipeline
+  chargée pour prédire la probabilité d'attrition et la classe de départ.
+"""
+
 import pandas as pd
 from joblib import load
 import logging
-from src import config
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Any  # Ajout de Any
 
-# Importer les fonctions de preprocessing nécessaires !
+from src import config  # Pour MODEL_PATH et BINARY_FEATURES_MAPPING
+
+# Importer les fonctions de preprocessing nécessaires
 from src.data_processing.preprocess import (
     clean_data,
     map_binary_features,
     create_features,
 )
 
+# Configuration du logging pour ce module
 logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
-_pipeline = None
+# Variable globale pour stocker la pipeline chargée et éviter de la recharger à chaque appel
+_pipeline: Any = (
+    None  # Utilisation de Any car le type exact de la pipeline peut être complexe
+)
 
-# --- FIN DÉFINITION ---
 
+def load_prediction_pipeline() -> Any | None:
+    """
+    Charge la pipeline de prédiction complète (préprocesseur + modèle) depuis le disque.
 
-def load_prediction_pipeline():
-    """Charge la pipeline complète (preprocessor + modèle) depuis le disque."""
+    La pipeline est chargée une seule fois et stockée dans une variable globale `_pipeline`
+    pour optimiser les appels suivants.
+
+    Returns:
+        Pipeline | None: L'objet pipeline Scikit-learn chargé, ou None si une erreur
+                         se produit (ex: fichier non trouvé, erreur de chargement).
+    """
     global _pipeline
-    if _pipeline is None:
+    if _pipeline is None:  # Charger seulement si pas déjà en mémoire
         if not config.MODEL_PATH.exists():
-            logger.error(f"Fichier pipeline non trouvé : {config.MODEL_PATH}")
+            logger.error(
+                f"Fichier pipeline non trouvé à l'emplacement configuré : {config.MODEL_PATH}"
+            )
             return None
         try:
-            logger.info(f"Chargement de la pipeline depuis {config.MODEL_PATH}...")
+            logger.info(
+                f"Chargement de la pipeline de prédiction depuis : {config.MODEL_PATH}..."
+            )
             _pipeline = load(config.MODEL_PATH)
-            logger.info("Pipeline chargée avec succès.")
+            logger.info("Pipeline de prédiction chargée avec succès.")
         except Exception as e:
             logger.error(
-                f"Erreur lors du chargement de la pipeline : {e}", exc_info=True
+                f"Erreur critique lors du chargement de la pipeline : {e}",
+                exc_info=True,
             )
-            _pipeline = None
+            _pipeline = None  # S'assurer que _pipeline est None en cas d'échec
             return None
     return _pipeline
 
 
-def predict_attrition(input_data: pd.DataFrame) -> Union[List[Dict], Dict]:
+def predict_attrition(
+    input_data: pd.DataFrame,
+) -> Union[List[Dict[str, Any]], Dict[str, str]]:
     """
-    Fait une prédiction sur de nouvelles données brutes (DataFrame).
-    Applique les transformations manuelles PUIS la pipeline sauvegardée.
+    Prédit le risque d'attrition pour les employés fournis en entrée.
+
+    Cette fonction prend un DataFrame de données brutes, applique les étapes
+    de preprocessing initiales (nettoyage, mappage binaire, création de features)
+    puis utilise la pipeline Scikit-learn entraînée et chargée pour effectuer
+    les prédictions.
+
+    Args:
+        input_data (pd.DataFrame): DataFrame contenant les données brutes des employés
+                                   pour lesquels faire une prédiction. Les colonnes doivent
+                                   correspondre aux attentes de `clean_data` et
+                                   `map_binary_features` (format brut).
+
+    Returns:
+        Union[List[Dict[str, Any]], Dict[str, str]]:
+            - Une liste de dictionnaires si la prédiction réussit, chaque dictionnaire
+              contenant 'id_employe', 'probabilite_depart', 'prediction_depart'.
+            - Un dictionnaire d'erreur `{"error": "message"}` si la pipeline n'est pas
+              chargée ou si une autre erreur majeure se produit.
     """
     pipeline = load_prediction_pipeline()
     if pipeline is None:
-        return {"error": "Pipeline non chargée. Veuillez entraîner le modèle."}
+        # Le logger dans load_prediction_pipeline aura déjà enregistré l'erreur spécifique.
+        return {
+            "error": "Pipeline de prédiction non chargée. Le modèle n'a peut-être pas été entraîné ou le fichier est manquant."
+        }
 
     try:
-        logger.info(f"Prédiction sur {len(input_data)} enregistrement(s)...")
+        logger.info(
+            f"Début de la prédiction pour {len(input_data)} enregistrement(s)..."
+        )
+
+        # Travailler sur une copie pour éviter de modifier le DataFrame original
+        data_to_process = input_data.copy()
 
         # --- ÉTAPE 1 : Appliquer les transformations manuelles ---
-        # Note: clean_data attend 'a_quitte_l_entreprise', on doit l'ajouter
-        # temporairement si elle n'y est pas, ou modifier clean_data.
-        # Pour la prédiction, il est plus simple de ne pas l'exiger.
-        # Modifions légèrement l'appel ou clean_data.
-        # Ici, on suppose que clean_data peut fonctionner sans la cible,
-        # ou on la modifie pour qu'elle puisse.
-        # Pour l'instant, on ajoute une colonne 'bidon' pour que ça passe.
-        if "a_quitte_l_entreprise" not in input_data.columns:
-            input_data["a_quitte_l_entreprise"] = "Non"  # Valeur arbitraire
+        # clean_data s'attend à la colonne 'a_quitte_l_entreprise' pour créer config.TARGET_VARIABLE.
+        # Pour la prédiction, cette colonne n'existe pas dans les données d'entrée.
+        # Nous ajoutons une colonne factice 'a_quitte_l_entreprise' pour que clean_data
+        # puisse s'exécuter sans erreur. Cette colonne sera ensuite supprimée.
+        if "a_quitte_l_entreprise" not in data_to_process.columns:
+            data_to_process["a_quitte_l_entreprise"] = (
+                "Non"  # Valeur factice, n'influence pas les features
+            )
+            logger.debug(
+                "Colonne 'a_quitte_l_entreprise' factice ajoutée pour le preprocessing."
+            )
 
-        df_cleaned = clean_data(input_data)
+        df_cleaned = clean_data(data_to_process)
+        # Utiliser le mapping centralisé depuis config.py
         df_mapped = map_binary_features(df_cleaned, config.BINARY_FEATURES_MAPPING)
         df_featured = create_features(df_mapped)
 
-        # Enlever la colonne cible si on l'a ajoutée ou si elle était là
-        X_predict = df_featured.drop(config.TARGET_VARIABLE, axis=1, errors="ignore")
+        # Préparer X_predict : supprimer la variable cible (même factice) et toute autre
+        # En se basant sur train_model.py, X_predict ne doit pas contenir TARGET_VARIABLE.
+        # Les autres colonnes non-features (comme id_employee) ont été retirées AVANT
+        # la définition des listes de colonnes pour build_preprocessor, donc le preprocessor ne les attend pas.
+        if config.TARGET_VARIABLE in df_featured.columns:
+            X_predict = df_featured.drop(config.TARGET_VARIABLE, axis=1)
+        else:
+            X_predict = df_featured  # Si TARGET_VARIABLE n'a pas été créé (ex: clean_data modifié)
 
-        logger.info("Transformations manuelles appliquées.")
+        logger.info(
+            f"Transformations manuelles appliquées. Shape de X_predict: {X_predict.shape}"
+        )
+        # logger.debug(f"Colonnes de X_predict avant la pipeline : {X_predict.columns.tolist()}")
 
         # --- ÉTAPE 2 : Utiliser la pipeline complète pour prédire ---
-        # La pipeline va maintenant appliquer le ColumnTransformer (scaling, OHE, etc.)
-        # ET ensuite le classifier.
+        logger.info("Application de la pipeline Scikit-learn pour la prédiction...")
         probabilities = pipeline.predict_proba(X_predict)[:, 1]
         predictions = pipeline.predict(X_predict)
+        logger.info("Calcul des probabilités et des classes terminé.")
 
         results = []
-        for i, index in enumerate(X_predict.index):
+        for i, index_val in enumerate(
+            X_predict.index
+        ):  # Renommé index en index_val pour éviter conflit
             results.append(
                 {
-                    "id_employe": index,
+                    "id_employe": index_val,  # Utilise l'index du DataFrame d'entrée
                     "probabilite_depart": float(probabilities[i]),
                     "prediction_depart": int(predictions[i]),
                 }
             )
-        logger.info("Prédiction terminée.")
+        logger.info("Prédictions formatées avec succès.")
         return results
 
     except Exception as e:
-        logger.error(f"Erreur lors de la prédiction : {e}", exc_info=True)
-        return {"error": f"Erreur de prédiction: {e}"}
+        logger.error(
+            f"Erreur critique lors du processus de prédiction : {e}", exc_info=True
+        )
+        return {"error": f"Erreur de prédiction : {str(e)}"}
 
 
-# Pour tester : poetry run python -m src.modeling.predict
+# Pour tester ce module : poetry run python -m src.modeling.predict
 if __name__ == "__main__":
-    # Créez un exemple de données BRUTES (comme si elles venaient d'un nouveau formulaire ou BDD)
-    # Doit contenir TOUTES les colonnes présentes dans les données avant le preprocessing.
-    # Utilisez les mêmes noms que dans vos fichiers CSV initiaux.
-    sample_data = pd.DataFrame(
-        {
-            "age": 45,
-            "genre": "M",
-            "revenu_mensuel": 4850,
-            "statut_marital": "Célibataire",
-            "departement": "Commercial",
-            "poste": "Cadre Commercial",
-            "nombre_experiences_precedentes": 8,
-            "annees_dans_l_entreprise": 5,
-            "satisfaction_employee_environnement": 4,
-            "note_evaluation_precedente": 3,
-            "satisfaction_employee_nature_travail": 3,
-            "satisfaction_employee_equipe": 3,
-            "satisfaction_employee_equilibre_pro_perso": 3,
-            "note_evaluation_actuelle": 3,
-            "heure_supplementaires": "Non",
-            "augementation_salaire_precedente": 15,
-            "nombre_participation_pee": 0,
-            "nb_formations_suivies": 3,
-            "distance_domicile_travail": 20,
-            "niveau_education": 3,
-            "domaine_etude": "Infra & Cloud",
-            "frequence_deplacement": "Occasionnel",
-            "annees_depuis_la_derniere_promotion": 0,
-        },
-        index=["EMP_TEST_1"],
-    )  # Donner des index pour l'ID
+    logger.info("--- Test direct du module predict.py ---")
+    # Exemple de données brutes (doit correspondre au schéma EmployeeInput de l'API)
+    sample_data_dict = {
+        # Assurez-vous que toutes les clés correspondent à EmployeeInput et aux attentes de clean_data
+        "age": [45, 30],
+        "genre": ["M", "F"],  # Utiliser les valeurs textuelles brutes
+        "revenu_mensuel": [4850, 6000],
+        "statut_marital": ["Célibataire", "Marié(e)"],
+        "departement": ["Commercial", "R&D"],
+        "poste": ["Cadre Commercial", "Ingenieur"],
+        "nombre_experiences_precedentes": [8, 5],
+        "annees_dans_l_entreprise": [5, 2],
+        "satisfaction_employee_environnement": [4, 3],
+        "note_evaluation_precedente": [3, 4],
+        "satisfaction_employee_nature_travail": [3, 2],
+        "satisfaction_employee_equipe": [3, 4],
+        "satisfaction_employee_equilibre_pro_perso": [3, 2],
+        "note_evaluation_actuelle": [3, 4],
+        "heure_supplementaires": ["Non", "Oui"],  # Valeurs textuelles brutes
+        "augementation_salaire_precedente": ["15 %", "10 %"],  # Format texte brut
+        "nombre_participation_pee": [0, 1],
+        "nb_formations_suivies": [3, 1],
+        "distance_domicile_travail": [20, 5],
+        "niveau_education": ["Bac+3", "Bac+5"],  # Exemple, adaptez à vos données
+        "domaine_etude": ["Infra & Cloud", "Developpement"],
+        "frequence_deplacement": ["Occasionnel", "Frequent"],  # Exemple, adaptez
+        "annees_depuis_la_derniere_promotion": [0, 1],
+        # Pas besoin de 'a_quitte_l_entreprise' ici, la fonction predict_attrition l'ajoute temporairement
+    }
+    sample_df = pd.DataFrame(sample_data_dict, index=["EMP_TEST_A", "EMP_TEST_B"])
 
-    # Vérifier si le modèle existe avant de tester
     if config.MODEL_PATH.exists():
-        predictions_output = predict_attrition(sample_data)
+        logger.info("Modèle trouvé, lancement de la prédiction test...")
+        predictions_output = predict_attrition(sample_df)
         print("\n--- Résultat de la Prédiction Test ---")
-        print(predictions_output)
+        if isinstance(predictions_output, dict) and "error" in predictions_output:
+            print(f"Erreur: {predictions_output['error']}")
+        else:
+            for res in predictions_output:
+                print(res)
     else:
         print(
-            f"\nModèle non trouvé à {config.MODEL_PATH}. Veuillez l'entraîner d'abord."
+            f"\nModèle non trouvé à {config.MODEL_PATH}. Veuillez l'entraîner d'abord avec train_model.py."
         )
+    logger.info("--- Fin du test direct du module predict.py ---")

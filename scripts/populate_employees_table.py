@@ -1,125 +1,161 @@
-# Dans scripts/populate_employees_table.py
+"""
+Script pour peupler la table 'employees' dans la base de données PostgreSQL
+à partir des fichiers CSV bruts.
+
+Ce script effectue les opérations suivantes :
+1. Charge et fusionne les données des fichiers CSV source.
+2. Applique les transformations initiales de nettoyage et de feature engineering.
+3. Itère sur le DataFrame résultant et insère chaque ligne dans la table 'employees'
+   en utilisant SQLAlchemy.
+"""
+
 import pandas as pd
 import logging
 from sqlalchemy.orm import Session
 
-from src.database.database_setup import SessionLocal, engine # Pour créer une session BDD
-from src.database.models import Employee # Votre modèle SQLAlchemy pour la table Employee
-# Importez les fonctions de chargement et de nettoyage que vous utilisiez pour les CSV
+from src.database.database_setup import SessionLocal
+from src.database.models import Employee
 from src.data_processing.load_data import load_and_merge_csvs
-from src.data_processing.preprocess import clean_data, map_binary_features, create_features
-from src import config
+from src.data_processing.preprocess import (
+    clean_data,
+    map_binary_features,
+    create_features,
+)
+from src import config  # Pour config.BINARY_FEATURES_MAPPING
 
-logging.basicConfig(level=logging.INFO)
+# Configuration du logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
+
 def populate_db():
-    logger.info("Chargement et préparation des données depuis les CSV...")
+    """
+    Charge les données depuis les fichiers CSV, les transforme, et les insère
+    dans la table 'employees' de la base de données.
+
+    S'assure que les données sont préparées (nettoyées, features binaires mappées,
+    features créées) avant l'insertion. Gère la session de base de données
+    pour les opérations d'écriture.
+    """
+    logger.info("Début du peuplement de la table 'employees'...")
+
+    logger.info("Chargement et fusion des données CSV brutes...")
     df_raw = load_and_merge_csvs()
     if df_raw is None:
         logger.error("Impossible de charger les données CSV. Arrêt du peuplement.")
         return
 
-    # Récupérer le mapping depuis config.py
-    current_binary_mapping = config.BINARY_FEATURES_MAPPING
+    logger.info("Application des transformations initiales des données...")
+    # clean_data devrait maintenant conserver 'id_employee' si c'est votre clé
+    df_cleaned = clean_data(df_raw)
+    df_mapped = map_binary_features(df_cleaned, config.BINARY_FEATURES_MAPPING)
+    df_processed_for_db = create_features(df_mapped)
 
-    # Appliquer les transformations initiales pour avoir les données
-    # dans le format attendu par la table 'employees'
-    df_cleaned = clean_data(df_raw) # Fait la conversion cible, supprime cols, convertit "XX %"
-    df_mapped = map_binary_features(df_cleaned, current_binary_mapping) # Mappe genre, heure_sup
-    df_featured = create_features(df_mapped) # Si vous avez des features créées ici
-                                              # qui doivent être stockées
+    if df_processed_for_db.empty:
+        logger.warning(
+            "Le DataFrame est vide après les transformations. Aucune donnée à insérer."
+        )
+        return
 
-    # La cible est déjà dans df_featured sous config.TARGET_VARIABLE
-    # Assurez-vous que les noms de colonnes de df_featured correspondent à ceux de votre modèle Employee
-    # et que les types sont compatibles.
-
-    logger.info(f"Données prêtes à être insérées : {df_featured.shape[0]} lignes.")
+    logger.info(
+        f"Données prêtes à être insérées : {df_processed_for_db.shape[0]} lignes."
+    )
 
     db: Session = SessionLocal()
+    insert_count = 0
+    skipped_count = 0
     try:
-        logger.info("Insertion des données dans la table 'employees'...")
-        insert_count = 0
-        for index, row in df_featured.iterrows():
-            # Créez un dictionnaire des données de la ligne
-            # en s'assurant que les clés correspondent aux attributs du modèle Employee
-            employee_data = row.to_dict()
+        logger.info("Début de l'insertion des données dans la table 'employees'...")
+        for index, row_data in df_processed_for_db.iterrows():
+            employee_data_dict = row_data.to_dict()
 
-            # Si votre modèle Employee a des noms d'attributs différents des colonnes du DataFrame
-            # vous devrez faire un mappage explicite ici.
-            # Par exemple, si df_featured a 'id_employee' et votre modèle a 'employee_id':
-            # employee_obj_data = {'employee_id': employee_data.get('id_employee'), ...}
+            pk_name = (
+                "id_employee"  # Nom de l'attribut clé primaire dans le modèle Employee
+            )
 
-            # Pour cet exemple, on suppose que les noms de colonnes du DataFrame final
-            # (après clean, map, feature) correspondent aux attributs du modèle Employee.
-            # Assurez-vous que employee_id est bien dans employee_data
-            if 'id_employee' not in employee_data and hasattr(Employee, 'id_employee'):
-                 # Essayez de récupérer l'id depuis l'index si c'était la clé
-                 employee_data['id_employee'] = index if isinstance(index, str) else str(index)
-
-
-            # Gérer le cas où la clé primaire 'id_employee' pourrait ne pas être dans row.to_dict()
-            # si elle faisait partie de l'index et n'est pas une colonne régulière.
-            # Ou si le nom de la colonne dans le DF est différent de l'attribut du modèle.
-            # Adaptez cette partie à votre structure exacte.
-
-            # Création de l'objet Employee
-            # On ne passe que les clés qui existent dans le modèle Employee pour éviter les erreurs
-            model_columns = {c.name for c in Employee.__table__.columns}
-            filtered_employee_data = {k: v for k, v in employee_data.items() if k in model_columns}
-
-
-            # Spécifiquement pour la clé primaire si elle vient de l'index
-            if 'id_employee' not in filtered_employee_data and hasattr(Employee, 'id_employee'):
-                if isinstance(index, tuple) and len(index) > 0: # MultiIndex
-                     # Décidez quelle partie de l'index utiliser ou comment la formater
-                    filtered_employee_data['id_employee'] = str(index[0]) # Exemple
-                else:
-                    filtered_employee_data['id_employee'] = str(index)
-
-
-            # Assurez-vous que la clé primaire a une valeur
-            pk_name = 'id_employee' # ou le nom de votre PK dans le modèle Employee
-            if pk_name not in filtered_employee_data or pd.isna(filtered_employee_data.get(pk_name)):
-                logger.warning(f"Clé primaire '{pk_name}' manquante ou NaN pour la ligne d'index {index}. Ligne ignorée.")
+            # Vérifier la présence et la validité de la clé primaire
+            if pk_name not in employee_data_dict or pd.isna(
+                employee_data_dict.get(pk_name)
+            ):
+                logger.warning(
+                    f"Clé primaire '{pk_name}' (valeur: {employee_data_dict.get(pk_name)}) "
+                    f"manquante ou NaN pour la ligne avec index de DataFrame {index}. Ligne ignorée."
+                )
+                skipped_count += 1
                 continue
 
+            # Filtrer les données pour ne garder que les colonnes du modèle Employee
+            # et convertir les NaN de Pandas en None pour SQLAlchemy
+            model_columns = {c.name for c in Employee.__table__.columns}
+            filtered_data_for_model = {
+                k: (None if pd.isna(v) else v)
+                for k, v in employee_data_dict.items()
+                if k in model_columns
+            }
 
-            # Vérifier si l'employé existe déjà pour éviter les doublons (facultatif, dépend de votre logique)
-            # existing_employee = db.query(Employee).filter(Employee.id_employee == filtered_employee_data[pk_name]).first()
+            # Assurer que la clé primaire a toujours une valeur après filtrage
+            if filtered_data_for_model.get(pk_name) is None:
+                logger.warning(
+                    f"Clé primaire '{pk_name}' devenue None après filtrage pour la ligne "
+                    f"avec index de DataFrame {index}. Ligne ignorée."
+                )
+                skipped_count += 1
+                continue
+
+            # Optionnel : Vérifier si l'employé existe déjà pour éviter les doublons
+            # existing_employee = db.query(Employee).filter(Employee.id_employee == filtered_data_for_model[pk_name]).first()
             # if existing_employee:
-            #     logger.info(f"L'employé {filtered_employee_data[pk_name]} existe déjà. Mise à jour ou ignoré.")
-            #     # Vous pouvez choisir de mettre à jour ou d'ignorer
+            #     logger.info(f"L'employé {filtered_data_for_model[pk_name]} existe déjà. Ignoré.")
+            #     skipped_count +=1
             #     continue
 
-
-            employee_to_insert = Employee(**filtered_employee_data)
+            employee_to_insert = Employee(**filtered_data_for_model)
             db.add(employee_to_insert)
             insert_count += 1
 
         db.commit()
-        logger.info(f"{insert_count} lignes insérées/mises à jour dans 'employees'.")
+        logger.info(
+            f"{insert_count} lignes insérées avec succès dans la table 'employees'."
+        )
+        if skipped_count > 0:
+            logger.info(
+                f"{skipped_count} lignes ont été ignorées (ID manquant/NaN ou déjà existant)."
+            )
+
     except Exception as e:
         db.rollback()
-        logger.error(f"Erreur lors de l'insertion des données : {e}")
+        logger.error(f"Erreur lors de l'insertion des données : {e}", exc_info=True)
+        # 'raise e' pourrait être remplacé par juste 'raise' pour relancer l'exception attrapée
+        # ou ne pas la relancer si vous voulez que le script se termine "proprement" après une erreur.
+        # Pour un script de peuplement, il est souvent bon de savoir s'il y a eu une erreur majeure.
         raise
     finally:
         db.close()
+        logger.info("Session de base de données fermée.")
+
 
 if __name__ == "__main__":
-    # IMPORTANT : Avant de lancer ce script, assurez-vous que la table 'employees'
-    # est vide si vous voulez éviter les doublons ou gérez les conflits.
-    # Pour une première exécution, c'est ok. Pour des exécutions répétées,
-    # il faudrait une logique pour éviter d'insérer les mêmes données.
-    # Par exemple, supprimer toutes les données de la table avant :
-    # from src.database.models import Employee
-    # db = SessionLocal()
+    logger.info("--- Démarrage du script de peuplement de la base de données ---")
+    # IMPORTANT : Ce script est conçu pour un premier peuplement.
+    # Si vous le relancez sur une base déjà peuplée, il tentera de réinsérer les données,
+    # ce qui causera des erreurs si les 'id_employee' sont uniques (clé primaire).
+    # Pour des exécutions multiples, implémentez une logique de suppression préalable
+    # ou de vérification d'existence (comme le bloc commenté ci-dessus).
+
+    # Exemple de suppression préalable (à utiliser avec prudence !) :
+    # logger.info("Tentative de suppression des données existantes de la table 'employees'...")
+    # temp_db = SessionLocal()
     # try:
-    #     num_rows_deleted = db.query(Employee).delete()
-    #     db.commit()
-    #     logger.info(f"{num_rows_deleted} lignes supprimées de la table employees.")
-    # except:
-    #     db.rollback()
+    #     num_rows_deleted = temp_db.query(Employee).delete()
+    #     temp_db.commit()
+    #     logger.info(f"{num_rows_deleted} lignes supprimées de la table 'employees'.")
+    # except Exception as e_del:
+    #     temp_db.rollback()
+    #     logger.error(f"Erreur lors de la suppression des données existantes : {e_del}")
     # finally:
-    #     db.close()
+    #     temp_db.close()
+
     populate_db()
+    logger.info("--- Script de peuplement de la base de données terminé ---")
