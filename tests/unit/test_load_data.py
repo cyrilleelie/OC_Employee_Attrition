@@ -21,11 +21,15 @@ def test_load_data_from_csv_success(mock_logger, mock_read_csv):
     mock_read_csv.return_value = sample_df
 
     dummy_path = "dummy_path.csv"
-    df = load_data_from_csv(dummy_path) # path est dummy_path
+    df = load_data_from_csv(dummy_path)  # path est dummy_path
 
     mock_read_csv.assert_called_once_with(dummy_path)
-    mock_logger.info.assert_any_call(f"Chargement des données CSV depuis {dummy_path}...")
-    mock_logger.info.assert_any_call(f"Données CSV chargées avec succès depuis {dummy_path}: {len(sample_df)} lignes.")
+    mock_logger.info.assert_any_call(
+        f"Chargement des données CSV depuis {dummy_path}..."
+    )
+    mock_logger.info.assert_any_call(
+        f"Données CSV chargées avec succès depuis {dummy_path}: {len(sample_df)} lignes."
+    )
     pd.testing.assert_frame_equal(df, sample_df)
 
 
@@ -200,10 +204,16 @@ def test_load_and_merge_csvs_success(mock_read_csv, mock_logger):
 
     # Vérifier les logs importants
     mock_logger.info.assert_any_call("Chargement des fichiers CSV bruts pour fusion...")
-    mock_logger.info.assert_any_call("Préparation de la clé de jointure 'id_employee' dans df_eval à partir de 'eval_number'...")
-    mock_logger.info.assert_any_call("Préparation de la clé de jointure 'id_employee' dans df_sondage à partir de 'code_sondage'...")
+    mock_logger.info.assert_any_call(
+        "Préparation de la clé de jointure 'id_employee' dans df_eval à partir de 'eval_number'..."
+    )
+    mock_logger.info.assert_any_call(
+        "Préparation de la clé de jointure 'id_employee' dans df_sondage à partir de 'code_sondage'..."
+    )
     # mock_logger.info.assert_any_call("'id_employee' créé dans df_eval.") # log absent du fichier load_data.py
-    mock_logger.info.assert_any_call("Fusion des DataFrames (df_sirh <- df_eval <- df_sondage)...")
+    mock_logger.info.assert_any_call(
+        "Fusion des DataFrames (df_sirh <- df_eval <- df_sondage)..."
+    )
     # mock_logger.info.assert_any_call(f"Données fusionnées : {merged_df.shape}") # Le shape peut varier
 
     # Vérifier le DataFrame fusionné
@@ -287,7 +297,9 @@ def test_load_and_merge_csvs_missing_eval_number_col(mock_read_csv, mock_logger)
     result_df = load_and_merge_csvs()
 
     assert result_df is None
-    mock_logger.error.assert_any_call("La colonne 'eval_number' est introuvable dans df_eval. Impossible de créer 'id_employee'.")
+    mock_logger.error.assert_any_call(
+        "La colonne 'eval_number' est introuvable dans df_eval. Impossible de créer 'id_employee'."
+    )
 
 
 @patch("src.data_processing.load_data.logger")

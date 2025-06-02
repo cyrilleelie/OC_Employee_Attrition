@@ -17,9 +17,11 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder, OrdinalEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
-from src import config # Pour config.TARGET_VARIABLE, config.BINARY_FEATURES_MAPPING, etc.
+from src import (
+    config,
+)  # Pour config.TARGET_VARIABLE, config.BINARY_FEATURES_MAPPING, etc.
 import logging
-import numpy as np # Pour np.number lors de la sélection de dtypes
+import numpy as np  # Pour np.number lors de la sélection de dtypes
 
 # Configuration du logging pour ce module
 logging.basicConfig(
@@ -41,7 +43,7 @@ def map_binary_features(df: pd.DataFrame, binary_cols_map: dict) -> pd.DataFrame
     Returns:
         pd.DataFrame: DataFrame avec les colonnes binaires mappées.
     """
-    df = df.copy() # Évite les SettingWithCopyWarning
+    df = df.copy()  # Évite les SettingWithCopyWarning
     logger.info("Application du mappage sur les features binaires...")
     for col, mapping in binary_cols_map.items():
         if col in df.columns:
@@ -54,10 +56,12 @@ def map_binary_features(df: pd.DataFrame, binary_cols_map: dict) -> pd.DataFrame
             # Si la colonne originale était object et contenait des strings et des NaN après map,
             # SimpleImputer(strategy='most_frequent') fonctionnerait mais SimpleImputer(strategy='median') échouerait.
             # Le plus sûr est de convertir en type numérique si on s'attend à 0 et 1.
-            df[col] = pd.to_numeric(df[col], errors='coerce') # Convertit en float, les erreurs (anciens NaN) restent NaN
+            df[col] = pd.to_numeric(
+                df[col], errors="coerce"
+            )  # Convertit en float, les erreurs (anciens NaN) restent NaN
 
             logger.info(f"Colonne '{col}' mappée en binaire numérique.")
-            
+
             nan_count = df[col].isnull().sum()
             if nan_count > 0:
                 logger.warning(
@@ -65,7 +69,9 @@ def map_binary_features(df: pd.DataFrame, binary_cols_map: dict) -> pd.DataFrame
                     f"correctement et sont devenue(s) NaN (ou étaient déjà NaN)."
                 )
         else:
-            logger.warning(f"Colonne binaire '{col}' spécifiée pour mappage mais non trouvée dans le DataFrame.")
+            logger.warning(
+                f"Colonne binaire '{col}' spécifiée pour mappage mais non trouvée dans le DataFrame."
+            )
     return df
 
 
@@ -96,8 +102,12 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
             {"Oui": 1, "Non": 0}
         )
         # Convertir en type entier nullable pour gérer les NaN si map échoue pour certaines valeurs
-        df[config.TARGET_VARIABLE] = pd.to_numeric(df[config.TARGET_VARIABLE], errors='coerce').astype('Int64')
-        logger.info(f"Colonne cible '{config.TARGET_VARIABLE}' créée et convertie en Int64.")
+        df[config.TARGET_VARIABLE] = pd.to_numeric(
+            df[config.TARGET_VARIABLE], errors="coerce"
+        ).astype("Int64")
+        logger.info(
+            f"Colonne cible '{config.TARGET_VARIABLE}' créée et convertie en Int64."
+        )
     else:
         # Pour la prédiction, cette colonne ne sera pas présente.
         # On ne devrait pas lever d'erreur si on est en mode prédiction.
@@ -105,34 +115,36 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
         # Et aussi par populate_db qui a besoin de la cible.
         # Pour predict.py, on ajoute une colonne factice 'a_quitte_l_entreprise'.
         # Donc, cette condition est surtout pour la robustesse lors de l'entraînement.
-        logger.warning("La colonne 'a_quitte_l_entreprise' est manquante. Si c'est pour la prédiction, c'est normal.")
+        logger.warning(
+            "La colonne 'a_quitte_l_entreprise' est manquante. Si c'est pour la prédiction, c'est normal."
+        )
         # Si cette fonction est appelée par un flux où la cible DOIT être là (comme populate_db ou train_model avant split X/y)
         # alors une erreur est appropriée.
         # Pour l'instant, on logue un warning, le check de présence de TARGET_VARIABLE se fera plus tard.
-
 
     # Liste des colonnes à supprimer (adaptez si nécessaire)
     # 'id_employee' est conservé pour le moment, car il est utilisé par populate_db
     # et sera explicitement retiré de X dans train_model.py avant l'entraînement.
     cols_to_drop = [
-        "nombre_heures_travailless", # Semble être une coquille (s en trop)
+        "nombre_heures_travailless",  # Semble être une coquille (s en trop)
         "eval_number",
         "nombre_employee_sous_responsabilite",
         "code_sondage",
         "ayant_enfants",
-        "a_quitte_l_entreprise", # Version texte de la cible, une fois la version numérique créée
-        "annee_experience_totale", # Supposée redondante ou moins pertinente
-        "niveau_hierarchique_poste", # Supposée redondante ou moins pertinente
-        "annees_dans_le_poste_actuel", # Supposée redondante ou moins pertinente
-        "annes_sous_responsable_actuel", # Coquille "annes" -> "annees" ?
+        "a_quitte_l_entreprise",  # Version texte de la cible, une fois la version numérique créée
+        "annee_experience_totale",  # Supposée redondante ou moins pertinente
+        "niveau_hierarchique_poste",  # Supposée redondante ou moins pertinente
+        "annees_dans_le_poste_actuel",  # Supposée redondante ou moins pertinente
+        "annes_sous_responsable_actuel",  # Coquille "annes" -> "annees" ?
     ]
     actual_cols_to_drop = [col for col in cols_to_drop if col in df.columns]
     if actual_cols_to_drop:
         df = df.drop(columns=actual_cols_to_drop, errors="ignore")
         logger.info(f"Colonnes supprimées : {actual_cols_to_drop}")
     else:
-        logger.info("Aucune colonne de la liste `cols_to_drop` n'a été trouvée pour suppression.")
-
+        logger.info(
+            "Aucune colonne de la liste `cols_to_drop` n'a été trouvée pour suppression."
+        )
 
     # Suppression des doublons
     initial_rows = len(df)
@@ -144,7 +156,9 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     col_aug = "augementation_salaire_precedente"
     if col_aug in df.columns:
         logger.info(f"Conversion de la colonne '{col_aug}' en numérique...")
-        df[col_aug] = df[col_aug].astype(str).str.replace(" %", "", regex=False).str.strip()
+        df[col_aug] = (
+            df[col_aug].astype(str).str.replace(" %", "", regex=False).str.strip()
+        )
         df[col_aug] = pd.to_numeric(df[col_aug], errors="coerce")
         nan_count = df[col_aug].isnull().sum()
         if nan_count > 0:
@@ -186,7 +200,9 @@ def create_features(df: pd.DataFrame) -> pd.DataFrame:
 
     # Pour l'instant, cette fonction ne fait rien de plus.
     # Vous pouvez ajouter ici la logique de création de features que vous aviez dans vos notebooks.
-    logger.info("Création de features terminée (actuellement, pas de nouvelles features implémentées).")
+    logger.info(
+        "Création de features terminée (actuellement, pas de nouvelles features implémentées)."
+    )
     return df
 
 
@@ -194,7 +210,7 @@ def build_preprocessor(
     numerical_cols: list,
     onehot_cols: list,
     ordinal_cols: list,
-    ordinal_categories_map: dict, # Renommé pour correspondre à l'usage dans la fct
+    ordinal_categories_map: dict,  # Renommé pour correspondre à l'usage dans la fct
 ) -> ColumnTransformer:
     """
     Construit et retourne un objet ColumnTransformer de Scikit-learn pour le prétraitement.
@@ -230,7 +246,9 @@ def build_preprocessor(
             ]
         )
         transformers_list.append(("num", numerical_transformer, numerical_cols))
-        logger.info(f"Transformateur numérique configuré pour les colonnes : {numerical_cols}")
+        logger.info(
+            f"Transformateur numérique configuré pour les colonnes : {numerical_cols}"
+        )
 
     if onehot_cols:
         onehot_transformer = Pipeline(
@@ -245,16 +263,21 @@ def build_preprocessor(
             ]
         )
         transformers_list.append(("onehot", onehot_transformer, onehot_cols))
-        logger.info(f"Transformateur OneHot configuré pour les colonnes : {onehot_cols}")
-
+        logger.info(
+            f"Transformateur OneHot configuré pour les colonnes : {onehot_cols}"
+        )
 
     if ordinal_cols:
         for col in ordinal_cols:
-            if col not in ordinal_categories_map: # Utilisation de ordinal_categories_map
+            if (
+                col not in ordinal_categories_map
+            ):  # Utilisation de ordinal_categories_map
                 raise ValueError(
                     f"Les catégories pour la colonne ordinale '{col}' ne sont pas définies dans ordinal_categories_map."
                 )
-            categories_for_col = [ordinal_categories_map[col]] # Utilisation de ordinal_categories_map
+            categories_for_col = [
+                ordinal_categories_map[col]
+            ]  # Utilisation de ordinal_categories_map
             ordinal_transformer_col = Pipeline(
                 steps=[
                     ("imputer", SimpleImputer(strategy="most_frequent")),
@@ -263,18 +286,21 @@ def build_preprocessor(
                         OrdinalEncoder(
                             categories=categories_for_col,
                             handle_unknown="use_encoded_value",
-                            unknown_value= np.nan # Utiliser np.nan, qui sera géré par l'imputer numérique si la colonne devient numérique
-                                                 # ou -1 si vous préférez et que l'imputer numérique n'est pas appliqué ensuite
+                            unknown_value=np.nan,  # Utiliser np.nan, qui sera géré par l'imputer numérique si la colonne devient numérique
+                            # ou -1 si vous préférez et que l'imputer numérique n'est pas appliqué ensuite
                         ),
                     ),
                 ]
             )
             transformers_list.append((f"ord_{col}", ordinal_transformer_col, [col]))
-        logger.info(f"Transformateurs ordinaux configurés pour les colonnes : {ordinal_cols}")
-
+        logger.info(
+            f"Transformateurs ordinaux configurés pour les colonnes : {ordinal_cols}"
+        )
 
     if not transformers_list:
-        logger.warning("Aucune colonne spécifiée pour le preprocessing. Le ColumnTransformer sera vide et utilisera remainder='passthrough'.")
+        logger.warning(
+            "Aucune colonne spécifiée pour le preprocessing. Le ColumnTransformer sera vide et utilisera remainder='passthrough'."
+        )
         # Retourner un transformateur qui ne fait rien mais ne plante pas.
         return ColumnTransformer(transformers=[], remainder="passthrough")
 
@@ -285,8 +311,8 @@ def build_preprocessor(
 
 def run_preprocessing_pipeline(
     df: pd.DataFrame,
-    binary_cols_map: dict = None, # Doit venir de config.BINARY_FEATURES_MAPPING
-    ordinal_cols_categories_map: dict = None, # Doit venir de config.ORDINAL_FEATURES_CATEGORIES. Renommé pour cohérence.
+    binary_cols_map: dict = None,  # Doit venir de config.BINARY_FEATURES_MAPPING
+    ordinal_cols_categories_map: dict = None,  # Doit venir de config.ORDINAL_FEATURES_CATEGORIES. Renommé pour cohérence.
     preprocessor: ColumnTransformer = None,
     fit: bool = False,
 ):
@@ -323,11 +349,15 @@ def run_preprocessing_pipeline(
     df_clean = clean_data(df)
 
     # Utiliser les mappings passés en argument, ou ceux de config si non fournis par l'appelant
-    current_binary_map = binary_cols_map if binary_cols_map is not None else config.BINARY_FEATURES_MAPPING
-    if current_binary_map: # Vérifier si le mapping est non vide/None
+    current_binary_map = (
+        binary_cols_map
+        if binary_cols_map is not None
+        else config.BINARY_FEATURES_MAPPING
+    )
+    if current_binary_map:  # Vérifier si le mapping est non vide/None
         df_mapped = map_binary_features(df_clean, current_binary_map)
     else:
-        df_mapped = df_clean.copy() # Pas de mappage binaire à faire
+        df_mapped = df_clean.copy()  # Pas de mappage binaire à faire
 
     df_featured = create_features(df_mapped)
 
@@ -340,9 +370,12 @@ def run_preprocessing_pipeline(
     X = df_featured.drop(config.TARGET_VARIABLE, axis=1)
 
     # Utiliser les catégories ordinales passées en argument, ou celles de config
-    current_ordinal_map = ordinal_cols_categories_map if ordinal_cols_categories_map is not None else config.ORDINAL_FEATURES_CATEGORIES
+    current_ordinal_map = (
+        ordinal_cols_categories_map
+        if ordinal_cols_categories_map is not None
+        else config.ORDINAL_FEATURES_CATEGORIES
+    )
     ordinal_to_encode = list(current_ordinal_map.keys()) if current_ordinal_map else []
-
 
     # Identification des types de colonnes pour le ColumnTransformer
     potential_numerical_cols = X.select_dtypes(include=[np.number]).columns.tolist()
@@ -363,9 +396,13 @@ def run_preprocessing_pipeline(
         if col not in X.columns:
             # Cela peut arriver si une colonne listée dans ORDINAL_FEATURES_CATEGORIES a été droppée
             # ou n'était pas dans le df initial.
-            raise ValueError(f"La colonne ordinale '{col}' spécifiée dans ordinal_cols_categories_map n'existe pas dans le DataFrame X.")
+            raise ValueError(
+                f"La colonne ordinale '{col}' spécifiée dans ordinal_cols_categories_map n'existe pas dans le DataFrame X."
+            )
 
-    logger.info(f"Colonnes identifiées pour la mise à l'échelle (numériques) : {numerical_to_scale}")
+    logger.info(
+        f"Colonnes identifiées pour la mise à l'échelle (numériques) : {numerical_to_scale}"
+    )
     logger.info(f"Colonnes identifiées pour OneHotEncoding : {onehot_to_encode}")
     logger.info(f"Colonnes identifiées pour OrdinalEncoding : {ordinal_to_encode}")
 
@@ -375,7 +412,7 @@ def run_preprocessing_pipeline(
             numerical_to_scale,
             onehot_to_encode,
             ordinal_to_encode,
-            current_ordinal_map, # Passer le dictionnaire complet
+            current_ordinal_map,  # Passer le dictionnaire complet
         )
         logger.info("Ajustement (fit) et transformation des données X...")
         X_processed = processor_instance.fit_transform(X)
@@ -392,9 +429,11 @@ def run_preprocessing_pipeline(
             y,
             processor_instance,
         )
-    else: # Mode transform uniquement
+    else:  # Mode transform uniquement
         if preprocessor:
-            logger.info("Transformation des données X (sans ajustement) en utilisant le préprocesseur fourni...")
+            logger.info(
+                "Transformation des données X (sans ajustement) en utilisant le préprocesseur fourni..."
+            )
             X_processed = preprocessor.transform(X)
             try:
                 feature_names = preprocessor.get_feature_names_out()
@@ -406,7 +445,9 @@ def run_preprocessing_pipeline(
             logger.info("Transformation X terminée.")
             return pd.DataFrame(X_processed, columns=feature_names, index=X.index), y
         else:
-            logger.error("Erreur: `fit` est False mais aucun `preprocessor` n'a été fourni.")
+            logger.error(
+                "Erreur: `fit` est False mais aucun `preprocessor` n'a été fourni."
+            )
             raise ValueError("Un preprocessor doit être fourni si fit=False.")
 
 
@@ -417,10 +458,13 @@ if __name__ == "__main__":
     # si load_data devait importer qqch de preprocess (ce qui n'est pas le cas actuellement)
     try:
         from src.data_processing.load_data import load_and_merge_csvs
+
         df_raw = load_and_merge_csvs()
 
         if df_raw is not None and not df_raw.empty:
-            logger.info(f"Données brutes chargées pour le test: {df_raw.shape[0]} lignes.")
+            logger.info(
+                f"Données brutes chargées pour le test: {df_raw.shape[0]} lignes."
+            )
             # Test du pipeline de preprocessing complet en mode fit=True
             # Les mappings et catégories sont pris depuis config.py par défaut dans run_preprocessing_pipeline
             X_p, y_p, proc = run_preprocessing_pipeline(
@@ -439,23 +483,30 @@ if __name__ == "__main__":
             # Exemple de test en mode transform=True avec le processeur fitté
             # On prend un échantillon des données brutes pour simuler de nouvelles données
             if len(df_raw) > 5:
-                df_sample_for_transform = df_raw.sample(n=min(5, len(df_raw)), random_state=42)
-                logger.info(f"\nTest du mode transform sur {len(df_sample_for_transform)} échantillons...")
+                df_sample_for_transform = df_raw.sample(
+                    n=min(5, len(df_raw)), random_state=42
+                )
+                logger.info(
+                    f"\nTest du mode transform sur {len(df_sample_for_transform)} échantillons..."
+                )
                 X_t, y_t = run_preprocessing_pipeline(
                     df_sample_for_transform,
-                    preprocessor=proc, # Utiliser le processeur fitté
-                    fit=False
+                    preprocessor=proc,  # Utiliser le processeur fitté
+                    fit=False,
                 )
                 print("\n--- Preprocessing Réussi (fit=False) ---")
                 print("Shape X_transformed:", X_t.shape)
                 print("X_transformed (head):")
                 print(X_t.head())
         else:
-            logger.error("Impossible de charger les données brutes pour le test du module preprocess.")
+            logger.error(
+                "Impossible de charger les données brutes pour le test du module preprocess."
+            )
 
     except Exception as e_main:
-        print(f"\n--- Erreur lors de l'exécution du test de preprocess.py ---")
+        print("\n--- Erreur lors de l'exécution du test de preprocess.py ---")
         print(e_main)
         import traceback
+
         traceback.print_exc()
     logger.info("--- Fin du test direct du module preprocess.py ---")

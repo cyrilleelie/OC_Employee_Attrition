@@ -18,18 +18,23 @@ def test_load_prediction_pipeline_success(
 
     # Réinitialiser la variable globale _pipeline pour ce test
     from src.modeling import predict
+
     predict._pipeline = None
 
     pipeline = load_prediction_pipeline()
 
     mock_model_path.exists.assert_called_once()
     mock_joblib_load.assert_called_once_with(mock_model_path)
-    
+
     # CORRECTION ICI :
-    expected_log_msg_loading = f"Chargement de la pipeline de prédiction depuis : {mock_model_path}..."
+    expected_log_msg_loading = (
+        f"Chargement de la pipeline de prédiction depuis : {mock_model_path}..."
+    )
     mock_logger.info.assert_any_call(expected_log_msg_loading)
 
-    mock_logger.info.assert_any_call("Pipeline de prédiction chargée avec succès.") # Vérifiez aussi ce message
+    mock_logger.info.assert_any_call(
+        "Pipeline de prédiction chargée avec succès."
+    )  # Vérifiez aussi ce message
     assert pipeline == mock_pipeline_obj
 
 
@@ -40,15 +45,18 @@ def test_load_prediction_pipeline_file_not_found(mock_logger, mock_model_path):
     mock_model_path.exists.return_value = False
 
     from src.modeling import predict
+
     predict._pipeline = None
 
     pipeline = load_prediction_pipeline()
 
     # Assertions
     mock_model_path.exists.assert_called_once()
-    
+
     # CORRECTION ICI :
-    expected_log_msg = f"Fichier pipeline non trouvé à l'emplacement configuré : {mock_model_path}"
+    expected_log_msg = (
+        f"Fichier pipeline non trouvé à l'emplacement configuré : {mock_model_path}"
+    )
     mock_logger.error.assert_any_call(expected_log_msg)
     assert pipeline is None
 
@@ -71,7 +79,9 @@ def test_load_prediction_pipeline_load_exception(
 
     pipeline = load_prediction_pipeline()
 
-    expected_log_msg = f"Erreur critique lors du chargement de la pipeline : {simulated_exception}"
+    expected_log_msg = (
+        f"Erreur critique lors du chargement de la pipeline : {simulated_exception}"
+    )
     mock_logger.error.assert_any_call(expected_log_msg, exc_info=True)
     assert pipeline is None
 

@@ -69,7 +69,9 @@ def test_clean_data_target_conversion(sample_df_for_clean):
     """Vérifie la conversion correcte de la variable cible."""
     df_cleaned = clean_data(sample_df_for_clean)
     assert config.TARGET_VARIABLE in df_cleaned.columns
-    expected_series = pd.Series([1, 0, 1, 0], name=config.TARGET_VARIABLE, dtype='Int64') # Spécifier dtype
+    expected_series = pd.Series(
+        [1, 0, 1, 0], name=config.TARGET_VARIABLE, dtype="Int64"
+    )  # Spécifier dtype
     assert df_cleaned[config.TARGET_VARIABLE].equals(expected_series)
 
 
@@ -166,7 +168,12 @@ def test_build_preprocessor_ordinal_col_missing_categories():
     ]  # Cette colonne n'est pas dans ordinal_categories
     expected_error_message = "Les catégories pour la colonne ordinale 'niveau_satisfaction' ne sont pas définies dans ordinal_categories_map."
     with pytest.raises(ValueError, match=expected_error_message):
-        build_preprocessor(numerical_cols, onehot_cols, ordinal_cols, config.ORDINAL_FEATURES_CATEGORIES) # Utilisez un nom de variable clair pour le dict de catégories
+        build_preprocessor(
+            numerical_cols,
+            onehot_cols,
+            ordinal_cols,
+            config.ORDINAL_FEATURES_CATEGORIES,
+        )  # Utilisez un nom de variable clair pour le dict de catégories
 
 
 def test_build_preprocessor_no_cols():
@@ -273,12 +280,14 @@ def test_run_preprocessing_pipeline_fit_false(sample_raw_df_for_pipeline):
     # Pour cela, il faudrait stocker X_train_processed.shape[1] du test précédent
 
 
-def test_run_preprocessing_pipeline_fit_false_no_processor(sample_raw_df_for_pipeline): # Utilisez la fixture
+def test_run_preprocessing_pipeline_fit_false_no_processor(
+    sample_raw_df_for_pipeline,
+):  # Utilisez la fixture
     """Teste que fit=False sans preprocessor lève une ValueError pour cette raison spécifique."""
     # Utilisez un DataFrame d'entrée qui est suffisamment complet pour passer les étapes
     # de clean_data, map_binary_features, create_features et l'identification des colonnes.
     # La fixture sample_raw_df_for_pipeline devrait convenir si elle est bien définie.
-    df_in = sample_raw_df_for_pipeline.copy() 
+    df_in = sample_raw_df_for_pipeline.copy()
 
     with pytest.raises(
         ValueError, match="Un preprocessor doit être fourni si fit=False."
@@ -288,6 +297,6 @@ def test_run_preprocessing_pipeline_fit_false_no_processor(sample_raw_df_for_pip
             df_in,
             binary_cols_map=config.BINARY_FEATURES_MAPPING,
             ordinal_cols_categories_map=config.ORDINAL_FEATURES_CATEGORIES,
-            preprocessor=None, # Explicitement None
-            fit=False
+            preprocessor=None,  # Explicitement None
+            fit=False,
         )

@@ -34,7 +34,7 @@ ENABLE_API_DB_LOGGING = os.getenv("ENABLE_API_DB_LOGGING", "false").lower() == "
 
 BINARY_FEATURES_MAPPING = {
     "genre": {"M": 0, "F": 1},
-    "heure_supplementaires": {"Non": 0, "Oui": 1}
+    "heure_supplementaires": {"Non": 0, "Oui": 1},
 }
 
 ORDINAL_FEATURES_CATEGORIES = {
@@ -44,6 +44,23 @@ ORDINAL_FEATURES_CATEGORIES = {
 LIMITED_VALUES_FEATURES = {
     "statut_marital": ["Célibataire", "Marié(e)", "Divorcé(e)"],
     "departement": ["Commercial", "Consulting", "Ressources Humaines"],
-    "poste": ["Cadre Commercial", "Assistant de Direction", "Consultant", "Tech Lead", "Manager", "Représentant Commercial", "Directeur Technique", "Senior Manager", "Ressources Humaines"],
-    "domaine_etude": ["Infra & Cloud", "Autre", "Transformation Digitale", "Marketing", "Entrepreunariat", "Ressources Humaines"]
+    "poste": [
+        "Cadre Commercial",
+        "Assistant de Direction",
+        "Consultant",
+        "Tech Lead",
+        "Manager",
+        "Représentant Commercial",
+        "Directeur Technique",
+        "Senior Manager",
+        "Ressources Humaines",
+    ],
+    "domaine_etude": [
+        "Infra & Cloud",
+        "Autre",
+        "Transformation Digitale",
+        "Marketing",
+        "Entrepreunariat",
+        "Ressources Humaines",
+    ],
 }

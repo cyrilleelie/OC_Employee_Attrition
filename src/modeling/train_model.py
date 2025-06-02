@@ -15,8 +15,9 @@ Ce script orchestre le pipeline complet de Machine Learning :
    classification, F2-score).
 8. Sauvegarde de la pipeline entraînée pour une utilisation ultérieure (prédictions).
 """
+
 import numpy as np
-from joblib import dump # Pour sauvegarder la pipeline
+from joblib import dump  # Pour sauvegarder la pipeline
 import logging
 
 from sklearn.model_selection import train_test_split
@@ -31,10 +32,10 @@ from sklearn.metrics import (
 # Fonctions et configurations importées des autres modules du projet
 from src.data_processing.load_data import get_data
 from src.data_processing.preprocess import (
-    create_features, # Utilisé pour la création de features à la volée
-    build_preprocessor, # Pour construire le ColumnTransformer
+    create_features,  # Utilisé pour la création de features à la volée
+    build_preprocessor,  # Pour construire le ColumnTransformer
 )
-from src import config # Pour TARGET_VARIABLE, ORDINAL_FEATURES_CATEGORIES, MODEL_PATH
+from src import config  # Pour TARGET_VARIABLE, ORDINAL_FEATURES_CATEGORIES, MODEL_PATH
 
 # Configuration du logging pour ce module
 logging.basicConfig(
@@ -62,10 +63,14 @@ def train_and_evaluate_pipeline():
     logger.info(">>> Début du processus d'entraînement et d'évaluation du modèle <<<")
 
     # --- 1. Charger les données ---
-    logger.info("Étape 1: Chargement des données depuis la source configurée (PostgreSQL).")
+    logger.info(
+        "Étape 1: Chargement des données depuis la source configurée (PostgreSQL)."
+    )
     df_loaded = get_data(source="postgres")
     if df_loaded is None or df_loaded.empty:
-        logger.error("Arrêt : Impossible de charger les données ou DataFrame vide depuis la source.")
+        logger.error(
+            "Arrêt : Impossible de charger les données ou DataFrame vide depuis la source."
+        )
         return
 
     # --- 2. Création de Features (si applicable) ---
@@ -78,31 +83,39 @@ def train_and_evaluate_pipeline():
         logger.error("Arrêt : DataFrame vide après l'étape de création de features.")
         return
 
-    df_for_training = df_featured.copy() # Utiliser une copie pour les modifications suivantes
+    df_for_training = (
+        df_featured.copy()
+    )  # Utiliser une copie pour les modifications suivantes
 
     # --- 3. Vérification et Séparation de la Cible (y) et des Features (X) ---
     logger.info("Étape 3: Séparation des features (X) et de la variable cible (y).")
     if config.TARGET_VARIABLE not in df_for_training.columns:
-        logger.error(f"La colonne cible '{config.TARGET_VARIABLE}' est introuvable dans le DataFrame.")
+        logger.error(
+            f"La colonne cible '{config.TARGET_VARIABLE}' est introuvable dans le DataFrame."
+        )
         raise ValueError(
             f"La colonne cible '{config.TARGET_VARIABLE}' n'est pas présente dans les données chargées."
         )
-    
+
     y = df_for_training[config.TARGET_VARIABLE]
-    
+
     # Exclure la cible et les colonnes non-feature de X
     cols_to_exclude_from_features = [
         config.TARGET_VARIABLE,
         "a_quitte_l_entreprise",  # Version texte originale de la cible, si présente
-        "id_employee",            # Identifiant, non utilisé comme feature
+        "id_employee",  # Identifiant, non utilisé comme feature
         "date_creation_enregistrement",
-        "date_derniere_modification"
+        "date_derniere_modification",
         # Ajoutez d'autres colonnes à exclure si nécessaire
     ]
-    
+
     X = df_for_training.drop(
-        columns=[col for col in cols_to_exclude_from_features if col in df_for_training.columns],
-        errors="ignore" # ignore si une colonne de la liste n'est pas trouvée dans df_for_training
+        columns=[
+            col
+            for col in cols_to_exclude_from_features
+            if col in df_for_training.columns
+        ],
+        errors="ignore",  # ignore si une colonne de la liste n'est pas trouvée dans df_for_training
     )
     logger.info(
         f"Nombre de features initiales dans X avant train_test_split : {len(X.columns)}"
@@ -110,31 +123,44 @@ def train_and_evaluate_pipeline():
     # logger.debug(f"Colonnes dans X : {X.columns.tolist()}") # Décommentez pour débogage détaillé
 
     # --- 4. Séparation en Ensembles d'Entraînement et de Test ---
-    logger.info("Étape 4: Séparation des données en ensembles d'entraînement et de test (80%/20%).")
+    logger.info(
+        "Étape 4: Séparation des données en ensembles d'entraînement et de test (80%/20%)."
+    )
     X_train, X_test, y_train, y_test = train_test_split(
         X,
         y,
-        test_size=0.20, # 20% des données pour le test
-        random_state=42, # Pour la reproductibilité
-        stratify=y,     # Maintient la proportion des classes dans les deux ensembles
+        test_size=0.20,  # 20% des données pour le test
+        random_state=42,  # Pour la reproductibilité
+        stratify=y,  # Maintient la proportion des classes dans les deux ensembles
     )
-    logger.info(f"Dimensions de l'ensemble d'entraînement - X_train: {X_train.shape}, y_train: {y_train.shape}")
-    logger.info(f"Dimensions de l'ensemble de test - X_test: {X_test.shape}, y_test: {y_test.shape}")
+    logger.info(
+        f"Dimensions de l'ensemble d'entraînement - X_train: {X_train.shape}, y_train: {y_train.shape}"
+    )
+    logger.info(
+        f"Dimensions de l'ensemble de test - X_test: {X_test.shape}, y_test: {y_test.shape}"
+    )
 
     # --- 5. Identification des Types de Colonnes pour le Préprocessing (basé sur X_train) ---
-    logger.info("Étape 5: Identification des types de colonnes pour le préprocessing (sur X_train).")
+    logger.info(
+        "Étape 5: Identification des types de colonnes pour le préprocessing (sur X_train)."
+    )
     potential_numerical_cols = X_train.select_dtypes(
         include=[np.number]
     ).columns.tolist()
-    ordinal_to_encode = list(config.ORDINAL_FEATURES_CATEGORIES.keys()) # Colonnes définies comme ordinales
-    
+    ordinal_to_encode = list(
+        config.ORDINAL_FEATURES_CATEGORIES.keys()
+    )  # Colonnes définies comme ordinales
+
     # Les colonnes numériques à scaler sont celles qui sont numériques et non ordinales
     numerical_to_scale = [
         col for col in potential_numerical_cols if col not in ordinal_to_encode
     ]
     # Les colonnes pour OneHotEncoding sont celles de type object/category qui ne sont pas ordinales
     onehot_to_encode = [
-        col for col in X_train.select_dtypes(include=["object", "category"]).columns.tolist()
+        col
+        for col in X_train.select_dtypes(
+            include=["object", "category"]
+        ).columns.tolist()
         if col not in ordinal_to_encode
     ]
     logger.info(f"Colonnes numériques à scaler : {numerical_to_scale}")
@@ -147,7 +173,7 @@ def train_and_evaluate_pipeline():
         numerical_cols=numerical_to_scale,
         onehot_cols=onehot_to_encode,
         ordinal_cols=ordinal_to_encode,
-        ordinal_categories_map=config.ORDINAL_FEATURES_CATEGORIES, # Le nom du paramètre a été harmonisé
+        ordinal_categories_map=config.ORDINAL_FEATURES_CATEGORIES,  # Le nom du paramètre a été harmonisé
     )
 
     # --- 7. Définition du Modèle de Classification ---
@@ -180,18 +206,25 @@ def train_and_evaluate_pipeline():
         classification_report(y_test, y_pred, target_names=["Non", "Oui"]),
     )
 
-    f2_scorer = fbeta_score(y_test, y_pred, beta=2, zero_division=0) # Ajout de zero_division pour éviter warning/erreur
+    f2_scorer = fbeta_score(
+        y_test, y_pred, beta=2, zero_division=0
+    )  # Ajout de zero_division pour éviter warning/erreur
     print(f"\nF2-Score (privilégie le Rappel pour la classe 'Oui') : {f2_scorer:.4f}")
 
     # --- 11. Sauvegarde de la Pipeline Ajustée ---
     logger.info("Étape 11: Sauvegarde de la pipeline entraînée...")
     try:
-        config.MODELS_DIR.mkdir(parents=True, exist_ok=True) # S'assurer que le dossier existe
+        config.MODELS_DIR.mkdir(
+            parents=True, exist_ok=True
+        )  # S'assurer que le dossier existe
         dump(full_pipeline, config.MODEL_PATH)
-        logger.info(f"Pipeline complète et ajustée sauvegardée dans : {config.MODEL_PATH}")
+        logger.info(
+            f"Pipeline complète et ajustée sauvegardée dans : {config.MODEL_PATH}"
+        )
     except Exception as e_save:
-        logger.error(f"Erreur lors de la sauvegarde de la pipeline : {e_save}", exc_info=True)
-
+        logger.error(
+            f"Erreur lors de la sauvegarde de la pipeline : {e_save}", exc_info=True
+        )
 
     logger.info(">>> Fin du processus d'entraînement et d'évaluation <<<")
 

@@ -7,10 +7,15 @@ pour charger les données depuis une base de données PostgreSQL une fois peupl�
 La fonction principale `get_data` sert d'interface pour obtenir les données
 pour le reste de l'application, typiquement pour l'entraînement du modèle.
 """
-import pandas as pd
-from sqlalchemy.orm import Session # Importé pour être utilisé dans load_data_from_postgres
 
-from src.database.database_setup import SessionLocal, engine # engine est utilisé implicitement par read_sql_query via db.bind
+import pandas as pd
+from sqlalchemy.orm import (
+    Session,
+)  # Importé pour être utilisé dans load_data_from_postgres
+
+from src.database.database_setup import (
+    SessionLocal,
+)  # engine est utilisé implicitement par read_sql_query via db.bind
 from src.database.models import Employee
 from src import config
 import logging
@@ -39,13 +44,17 @@ def load_data_from_csv(path: str = config.PROCESSED_DATA_PATH) -> pd.DataFrame |
     try:
         logger.info(f"Chargement des données CSV depuis {path}...")
         df = pd.read_csv(path)
-        logger.info(f"Données CSV chargées avec succès depuis {path}: {df.shape[0]} lignes.")
+        logger.info(
+            f"Données CSV chargées avec succès depuis {path}: {df.shape[0]} lignes."
+        )
         return df
     except FileNotFoundError:
         logger.error(f"Fichier CSV non trouvé : {path}")
         return None
     except Exception as e:
-        logger.error(f"Erreur inattendue lors du chargement du CSV {path}: {e}", exc_info=True)
+        logger.error(
+            f"Erreur inattendue lors du chargement du CSV {path}: {e}", exc_info=True
+        )
         return None
 
 
@@ -65,7 +74,9 @@ def load_data_from_postgres() -> pd.DataFrame:
         logger.info(
             "Chargement des données depuis la table 'employees' de PostgreSQL..."
         )
-        query = db.query(Employee) # Construit une requête pour sélectionner toutes les colonnes de Employee
+        query = db.query(
+            Employee
+        )  # Construit une requête pour sélectionner toutes les colonnes de Employee
         # Exécute la requête et charge les résultats dans un DataFrame Pandas
         df = pd.read_sql_query(sql=query.statement, con=db.bind)
 
@@ -147,10 +158,15 @@ def load_and_merge_csvs() -> pd.DataFrame | None:
         df_sondage = pd.read_csv(config.RAW_SONDAGE_PATH)
 
         # Préparation de df_eval
-        logger.info("Préparation de la clé de jointure 'id_employee' dans df_eval à partir de 'eval_number'...")
+        logger.info(
+            "Préparation de la clé de jointure 'id_employee' dans df_eval à partir de 'eval_number'..."
+        )
         if "eval_number" in df_eval.columns:
             df_eval["id_employee_str_temp"] = (
-                df_eval["eval_number"].astype(str).str.split("_", n=1).str.get(1) # Prend tout après le premier '_'
+                df_eval["eval_number"]
+                .astype(str)
+                .str.split("_", n=1)
+                .str.get(1)  # Prend tout après le premier '_'
             )
             numeric_ids_for_check = pd.to_numeric(
                 df_eval["id_employee_str_temp"], errors="coerce"
@@ -161,30 +177,41 @@ def load_and_merge_csvs() -> pd.DataFrame | None:
                     f"{nan_count} 'eval_number' (après extraction) n'ont pas pu être convertis "
                     f"en id_employee numériques valides et sont devenus NaN."
                 )
-            df_eval["id_employee"] = df_eval["id_employee_str_temp"].astype(str) # Clé finale en string
+            df_eval["id_employee"] = df_eval["id_employee_str_temp"].astype(
+                str
+            )  # Clé finale en string
             df_eval = df_eval.drop(columns=["id_employee_str_temp"])
             logger.info("'id_employee' créé et formaté en string dans df_eval.")
         else:
-            logger.error("La colonne 'eval_number' est introuvable dans df_eval. Impossible de créer 'id_employee'.")
+            logger.error(
+                "La colonne 'eval_number' est introuvable dans df_eval. Impossible de créer 'id_employee'."
+            )
             return None
 
         # Préparation de df_sondage
-        logger.info("Préparation de la clé de jointure 'id_employee' dans df_sondage à partir de 'code_sondage'...")
-        if "code_sondage" in df_sondage.columns: # Supposons que code_sondage est directement l'id_employee
+        logger.info(
+            "Préparation de la clé de jointure 'id_employee' dans df_sondage à partir de 'code_sondage'..."
+        )
+        if (
+            "code_sondage" in df_sondage.columns
+        ):  # Supposons que code_sondage est directement l'id_employee
             # Si code_sondage nécessite une transformation similaire à eval_number, appliquez-la ici.
             # Pour cet exemple, on suppose que code_sondage EST l'id_employee.
             df_sondage["id_employee"] = df_sondage["code_sondage"].astype(str)
             # Si vous aviez 'id_employee_str_temp' ici aussi, n'oubliez pas de le drop.
-            logger.info("'id_employee' (depuis code_sondage) formaté en string dans df_sondage.")
+            logger.info(
+                "'id_employee' (depuis code_sondage) formaté en string dans df_sondage."
+            )
         else:
             # Si 'code_sondage' n'existe pas, on pourrait vérifier si 'id_employee' existe déjà
             if "id_employee" not in df_sondage.columns:
-                logger.error("Ni 'code_sondage' ni 'id_employee' trouvés dans df_sondage.")
+                logger.error(
+                    "Ni 'code_sondage' ni 'id_employee' trouvés dans df_sondage."
+                )
                 return None
-            else: # id_employee existe déjà, on s'assure juste du type
-                 df_sondage["id_employee"] = df_sondage["id_employee"].astype(str)
-                 logger.info("'id_employee' existant dans df_sondage formaté en string.")
-
+            else:  # id_employee existe déjà, on s'assure juste du type
+                df_sondage["id_employee"] = df_sondage["id_employee"].astype(str)
+                logger.info("'id_employee' existant dans df_sondage formaté en string.")
 
         # Standardisation du type de 'id_employee' dans df_sirh
         if "id_employee" in df_sirh.columns:
@@ -197,7 +224,9 @@ def load_and_merge_csvs() -> pd.DataFrame | None:
         df_merged = pd.merge(df_sirh, df_eval, on="id_employee", how="left")
         df_merged = pd.merge(df_merged, df_sondage, on="id_employee", how="left")
 
-        logger.info(f"Données fusionnées avec succès : {df_merged.shape[0]} lignes, {df_merged.shape[1]} colonnes.")
+        logger.info(
+            f"Données fusionnées avec succès : {df_merged.shape[0]} lignes, {df_merged.shape[1]} colonnes."
+        )
         return df_merged
 
     except FileNotFoundError as e:
@@ -219,7 +248,9 @@ if __name__ == "__main__":
         print(f"\nDimensions des données depuis DB : {data_from_db.shape}")
         # print(f"\nTypes de données depuis DB :\n{data_from_db.dtypes}") # Peut être verbeux
     else:
-        print("Aucune donnée chargée depuis la base ou une erreur s'est produite lors du chargement.")
+        print(
+            "Aucune donnée chargée depuis la base ou une erreur s'est produite lors du chargement."
+        )
 
     # Décommentez pour tester le chargement et la fusion des CSV bruts
     # logger.info("\n--- Test du chargement et de la fusion des CSV bruts ---")
