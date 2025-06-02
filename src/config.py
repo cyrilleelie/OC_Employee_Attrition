@@ -18,7 +18,7 @@ PROCESSED_DATA_PATH = DATA_DIR / "processed" / "data_rh_final.csv"
 MODEL_NAME = "attrition_logistic_regression.joblib"
 MODEL_PATH = MODELS_DIR / MODEL_NAME
 
-TARGET_VARIABLE = 'a_quitte_l_entreprise_numeric'
+TARGET_VARIABLE = "a_quitte_l_entreprise_numeric"
 
 DB_USER = os.getenv("POSTGRES_USER", "default_user")
 DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "default_password")
@@ -32,12 +32,12 @@ API_VERSION = "0.1.0"
 
 # --- AJOUT DES MAPPINGS ET CATÉGORIES ICI ---
 BINARY_FEATURES_MAPPING = {
-    'genre': {'M': 0, 'F': 1}, # Adaptez si 'Masculin'/'Féminin' etc.
-    'heure_supplementaires': {'Non': 0, 'Oui': 1} # Adaptez 'Non'/'Oui' si nécessaire.
+    "genre": {"M": 0, "F": 1},  # Adaptez si 'Masculin'/'Féminin' etc.
+    "heure_supplementaires": {"Non": 0, "Oui": 1},  # Adaptez 'Non'/'Oui' si nécessaire.
 }
 
 ORDINAL_FEATURES_CATEGORIES = {
-    'frequence_deplacement': ["Aucun", "Occasionnel", "Frequent"],
+    "frequence_deplacement": ["Aucun", "Occasionnel", "Frequent"],
     # Ajoutez vos autres colonnes ordinales et leurs catégories ordonnées ici
 }
 # --- FIN AJOUT ---
