@@ -1,156 +1,258 @@
-from fastapi import FastAPI, HTTPException, status, Depends # AJOUT: Depends
+"""
+Module principal de l'API FastAPI pour la prédiction d'attrition des employés.
+
+Définit les endpoints de l'API, gère le cycle de vie de l'application (chargement du modèle),
+valide les données d'entrée, appelle la logique de prédiction, et enregistre
+les interactions dans une base de données PostgreSQL.
+"""
+from fastapi import FastAPI, HTTPException, status, Depends
 import pandas as pd
 import logging
-from typing import List
-from contextlib import asynccontextmanager
-from sqlalchemy.orm import Session # AJOUT: Session
+from contextlib import asynccontextmanager # Pour le gestionnaire de cycle de vie (lifespan)
+from sqlalchemy.orm import Session # Pour l'injection de dépendance de la session BDD
+from typing import List # Nécessaire pour List[EmployeeInput] dans BulkPredictionInput
 
-# Importe nos schémas Pydantic
-from .schemas import EmployeeInput, PredictionOutput, BulkPredictionInput, BulkPredictionOutput
-# Importe notre fonction de prédiction et le chargement
+# Importe les schémas Pydantic pour la validation et la sérialisation des données
+from .schemas import (
+    EmployeeInput,
+    PredictionOutput,
+    BulkPredictionInput,
+    BulkPredictionOutput,
+)
+# Importe la logique de prédiction et de chargement du modèle
 from src.modeling.predict import predict_attrition, load_prediction_pipeline
-# Importe notre configuration
+# Importe les configurations globales du projet
 from src import config
-# AJOUT: Imports pour la base de données
-from src.database.database_setup import get_db, SessionLocal # Assurez-vous que get_db est bien ici
-from src.database.models import ApiPredictionLog # Notre modèle SQLAlchemy pour les logs
+# Imports pour l'interaction avec la base de données
+from src.database.database_setup import get_db # Dépendance pour la session BDD
+from src.database.models import ApiPredictionLog # Modèle SQLAlchemy pour les logs de prédiction
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Configuration de base du logging pour ce module
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("Chargement de la pipeline au démarrage (via lifespan)...")
-    pipeline = load_prediction_pipeline()
-    if pipeline is None:
-        logger.error("ÉCHEC du chargement de la pipeline au démarrage. L'API pourrait ne pas fonctionner.")
-    else:
-        logger.info("Pipeline chargée avec succès au démarrage.")
-    yield
-    logger.info("Application API en cours d'arrêt.")
+    """
+    Gestionnaire de cycle de vie (lifespan) pour l'application FastAPI.
 
+    Est exécuté au démarrage et à l'arrêt de l'application.
+    Utilisé ici pour charger la pipeline de prédiction au démarrage.
+    """
+    logger.info("Démarrage de l'application API : Tentative de chargement de la pipeline de prédiction...")
+    pipeline = load_prediction_pipeline() # Tente de charger la pipeline stockée globalement dans predict.py
+    if pipeline is None:
+        logger.error(
+            "ÉCHEC CRITIQUE du chargement de la pipeline au démarrage. "
+            "L'API pourrait ne pas être en mesure de faire des prédictions."
+        )
+    else:
+        logger.info("Pipeline de prédiction chargée avec succès au démarrage.")
+    yield # L'application s'exécute ici
+    logger.info("Arrêt de l'application API.")
+
+
+# Initialisation de l'application FastAPI avec le gestionnaire de cycle de vie
 app = FastAPI(
     title=config.API_TITLE,
     version=config.API_VERSION,
-    description="Une API pour prédire le risque d'attrition des employés.",
-    lifespan=lifespan
+    description="Une API pour prédire le risque d'attrition des employés, avec enregistrement des prédictions.",
+    lifespan=lifespan,
 )
 
-@app.get("/", tags=["Health Check"])
-async def read_root():
-    return {"message": f"Bienvenue sur l'{config.API_TITLE} - v{config.API_VERSION}. Accédez à /docs pour la documentation."}
 
-@app.post("/predict", response_model=PredictionOutput, tags=["Predictions"])
+@app.get("/", tags=["Health Check"], summary="Vérification de l'état de l'API")
+async def read_root():
+    """
+    Endpoint racine pour vérifier la disponibilité et la version de l'API.
+    """
+    return {
+        "message": f"Bienvenue sur l'{config.API_TITLE} - v{config.API_VERSION}. Accédez à /docs pour la documentation interactive."
+    }
+
+
+@app.post("/predict", 
+          response_model=PredictionOutput, 
+          tags=["Predictions"],
+          summary="Prédire l'attrition pour un seul employé")
 async def predict_single(
-    employee_data: EmployeeInput, # Les données brutes de l'employé
-    db: Session = Depends(get_db) # Injection de la session BDD
+    employee_data: EmployeeInput,  # Données d'entrée validées par Pydantic
+    db: Session = Depends(get_db),  # Injection de la session de base de données
 ):
-    if load_prediction_pipeline() is None:
+    """
+    Prédit le risque d'attrition pour un seul employé.
+
+    Les données de l'employé sont fournies dans le corps de la requête au format JSON.
+    La prédiction (probabilité et classe) est retournée.
+    L'input et l'output de la prédiction sont enregistrés en base de données.
+    """
+    if load_prediction_pipeline() is None: # Vérifie si la pipeline globale est chargée
+        logger.error("Tentative d'appel à /predict alors que la pipeline n'est pas chargée.")
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Le modèle n'est pas chargé."
+            detail="Modèle de prédiction non disponible. Veuillez réessayer plus tard.",
         )
     try:
-        # Convertir l'input Pydantic en DataFrame Pandas pour la fonction de prédiction
-        # L'index ici est arbitraire car predict_attrition utilise l'index du DataFrame
-        # pour le champ 'id_employe' dans sa sortie. On pourrait vouloir passer
-        # un 'employee_id' optionnel dans EmployeeInput et l'utiliser ici si disponible.
-        # Pour l'instant, on utilise un index par défaut.
-        temp_index_for_df = "API_SINGLE_PREDICT" # Ou un UUID, ou un ID passé dans employee_data
+        # L'index est utilisé par predict_attrition pour le champ 'id_employe' de la sortie.
+        # Un identifiant unique pour cette requête serait idéal.
+        temp_index_for_df = "PREDICT_SINGLE_REQUEST" # Pourrait être un UUID généré
+        
+        # Conversion des données Pydantic en DataFrame Pandas pour la fonction de prédiction
         df = pd.DataFrame([employee_data.model_dump()], index=[temp_index_for_df])
-        
-        logger.info(f"Prédiction pour 1 employé (données brutes): {employee_data.model_dump(exclude_none=True)}")
-        
-        prediction_results_list = predict_attrition(df) # Devrait retourner une liste avec un seul dict
 
+        logger.info(
+            f"Requête /predict reçue pour l'employé (index temporaire: {temp_index_for_df}). "
+            f"Données : {employee_data.model_dump(exclude_none=True)}"
+        )
+        
+        # Appel à la logique de prédiction
+        prediction_results_list = predict_attrition(df)
+
+        # Gestion des erreurs retournées par predict_attrition
         if isinstance(prediction_results_list, dict) and "error" in prediction_results_list:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=prediction_results_list["error"])
-        if not prediction_results_list or len(prediction_results_list) == 0:
-             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="La prédiction a échoué.")
+            logger.error(f"Erreur retournée par predict_attrition: {prediction_results_list['error']}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=prediction_results_list["error"],
+            )
+        if not prediction_results_list: # Devrait être une liste d'un élément
+            logger.error("predict_attrition n'a retourné aucun résultat pour une prédiction unique.")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="La prédiction a échoué à produire un résultat.",
+            )
 
         single_prediction_result = prediction_results_list[0]
 
-        # --- Enregistrement dans la base de données ---
-        try:
-            log_entry = ApiPredictionLog(
-                # employee_id_concerne: si EmployeeInput avait un champ id, on l'utiliserait ici.
-                # Sinon, on peut utiliser l'index que predict_attrition a retourné, s'il est significatif.
-                # Pour cet exemple, on va supposer qu'on loggue l'ID généré/utilisé par predict_attrition,
-                # ou un ID passé dans l'input si vous l'ajoutez à EmployeeInput
-                employee_id_concerne=str(single_prediction_result.get("id_employe", temp_index_for_df)),
-                input_data=employee_data.model_dump(), # Stocke le dictionnaire Pydantic
-                prediction_probabilite=single_prediction_result["probabilite_depart"],
-                prediction_classe=single_prediction_result["prediction_depart"],
-                version_modele=config.MODEL_NAME # Ou une version plus dynamique si vous en avez
-            )
-            db.add(log_entry)
-            db.commit()
-            db.refresh(log_entry) # Pour obtenir log_id si besoin
-            logger.info(f"Prédiction enregistrée dans la BDD avec log_id: {log_entry.log_id}")
-        except Exception as db_error:
-            logger.error(f"Erreur lors de l'enregistrement du log en BDD: {db_error}", exc_info=True)
-            db.rollback()
-            # On ne veut pas que l'appel API échoue si seul le logging échoue
-            # Mais c'est un choix de conception. Vous pourriez vouloir lever une erreur ici.
-        # --- Fin Enregistrement ---
+        # Enregistrement en base de données
+        if config.ENABLE_API_DB_LOGGING: # Utilisation de la variable de configuration
+            try:
+                print("DEBUG: Entrée dans le bloc de logging BDD") # DEBUG
+                log_entry = ApiPredictionLog(
+                    employee_id_concerne=str(single_prediction_result.get("id_employe", temp_index_for_df)),
+                    input_data=employee_data.model_dump(), # Stocke le dictionnaire complet des données d'entrée
+                    prediction_probabilite=single_prediction_result["probabilite_depart"],
+                    prediction_classe=single_prediction_result["prediction_depart"],
+                    version_modele=config.MODEL_NAME,
+                )
+                print(f"DEBUG: log_entry créé: {log_entry}") # DEBUG
+                db.add(log_entry) # db est la session ici
+                print("DEBUG: db.add(log_entry) appelé") # DEBUG
+                db.commit()
+                db.refresh(log_entry)
+                logger.info(
+                    f"Prédiction pour {temp_index_for_df} enregistrée en BDD (log_id: {log_entry.log_id})."
+                )
+            except Exception as db_error:
+                logger.error(
+                    f"Erreur lors de l'enregistrement du log de prédiction en BDD: {db_error}",
+                    exc_info=True,
+                )
+                db.rollback()
+                # Pas de HTTPException ici pour ne pas faire échouer la réponse au client si seul le log échoue.
 
         return single_prediction_result
 
-    except HTTPException as http_exc: # Repropager les HTTPException
+    except HTTPException as http_exc: # Important de repropager les HTTPException pour que FastAPI les gère
         raise http_exc
-    except Exception as e:
-        logger.error(f"Erreur dans /predict : {e}", exc_info=True)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Erreur interne : {e}")
+    except Exception as e: # Capture les autres exceptions non prévues
+        logger.error(f"Erreur inattendue dans l'endpoint /predict : {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Une erreur interne s'est produite lors du traitement de votre requête.",
+        )
 
-@app.post("/predict_bulk", response_model=BulkPredictionOutput, tags=["Predictions"])
+
+@app.post("/predict_bulk", 
+          response_model=BulkPredictionOutput, 
+          tags=["Predictions"],
+          summary="Prédire l'attrition pour plusieurs employés")
 async def predict_bulk(
-    input_data: BulkPredictionInput,
-    db: Session = Depends(get_db) # Injection de la session BDD
+    input_data: BulkPredictionInput, # Données d'entrée validées (liste d'employés)
+    db: Session = Depends(get_db),   # Injection de la session BDD
 ):
+    """
+    Prédit le risque d'attrition pour une liste d'employés.
+
+    Les données des employés sont fournies dans le corps de la requête au format JSON,
+    sous une clé "employees" contenant une liste d'objets employé.
+    Retourne une liste de prédictions.
+    Les inputs et outputs de chaque prédiction sont enregistrés en base de données.
+    """
     if load_prediction_pipeline() is None:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Le modèle n'est pas chargé.")
-    if not input_data.employees:
-         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="La liste d'employés est vide.")
+        logger.error("Tentative d'appel à /predict_bulk alors que la pipeline n'est pas chargée.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Modèle de prédiction non disponible. Veuillez réessayer plus tard.",
+        )
+    if not input_data.employees: # input_data est BulkPredictionInput, input_data.employees est la liste
+        logger.warning("Requête /predict_bulk reçue avec une liste d'employés vide.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, # Erreur client
+            detail="La liste d'employés ('employees') ne peut pas être vide.",
+        )
 
     try:
-        # Conserver les inputs originaux pour le logging
         original_inputs = [emp.model_dump() for emp in input_data.employees]
         
-        # Créer le DataFrame pour la prédiction
-        df_index = [f"BULK_{i}" for i in range(len(original_inputs))] # Index temporaires pour le DF
-        df = pd.DataFrame(original_inputs, index=df_index)
-        logger.info(f"Prédiction en masse pour {len(df)} employés.")
+        # Création d'index temporaires pour le DataFrame, utiles pour le retour de predict_attrition
+        df_indices = [f"BULK_REQ_{i}" for i in range(len(original_inputs))]
+        df_for_prediction = pd.DataFrame(original_inputs, index=df_indices)
         
-        prediction_results_list = predict_attrition(df) # Ceci est une liste de dictionnaires
+        logger.info(f"Requête /predict_bulk reçue pour {len(df_for_prediction)} employés.")
+        
+        prediction_results_list = predict_attrition(df_for_prediction)
 
         if isinstance(prediction_results_list, dict) and "error" in prediction_results_list:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=prediction_results_list["error"])
+            logger.error(f"Erreur retournée par predict_attrition pour une requête en masse: {prediction_results_list['error']}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=prediction_results_list["error"],
+            )
         if not prediction_results_list or len(prediction_results_list) != len(original_inputs):
-             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="La prédiction en masse a échoué ou n'a pas retourné le bon nombre de résultats.")
+            logger.error("predict_attrition n'a pas retourné le bon nombre de résultats pour une requête en masse.")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="La prédiction en masse a échoué ou un nombre incorrect de résultats a été retourné.",
+            )
 
-        # --- Enregistrement dans la base de données ---
-        try:
-            for i, original_input_dict in enumerate(original_inputs):
-                current_prediction_result = prediction_results_list[i]
-                log_entry = ApiPredictionLog(
-                    employee_id_concerne=str(current_prediction_result.get("id_employe", df_index[i])),
-                    input_data=original_input_dict,
-                    prediction_probabilite=current_prediction_result["probabilite_depart"],
-                    prediction_classe=current_prediction_result["prediction_depart"],
-                    version_modele=config.MODEL_NAME
+        # Enregistrement en base de données
+        if config.ENABLE_API_DB_LOGGING:
+            log_entries_to_add = []
+            try:
+                for i, original_input_dict in enumerate(original_inputs):
+                    current_prediction_result = prediction_results_list[i]
+                    log_entry = ApiPredictionLog(
+                        employee_id_concerne=str(current_prediction_result.get("id_employe", df_indices[i])),
+                        input_data=original_input_dict,
+                        prediction_probabilite=current_prediction_result["probabilite_depart"],
+                        prediction_classe=current_prediction_result["prediction_depart"],
+                        version_modele=config.MODEL_NAME,
+                    )
+                    log_entries_to_add.append(log_entry)
+                
+                db.add_all(log_entries_to_add) # Plus efficace pour les insertions multiples
+                db.commit()
+                logger.info(
+                    f"{len(original_inputs)} prédictions en masse enregistrées en BDD."
                 )
-                db.add(log_entry)
-            db.commit()
-            logger.info(f"{len(original_inputs)} prédictions en masse enregistrées dans la BDD.")
-        except Exception as db_error:
-            logger.error(f"Erreur lors de l'enregistrement des logs en masse en BDD: {db_error}", exc_info=True)
-            db.rollback()
-        # --- Fin Enregistrement ---
+            except Exception as db_error:
+                logger.error(
+                    f"Erreur lors de l'enregistrement des logs de prédiction en masse en BDD: {db_error}",
+                    exc_info=True,
+                )
+                db.rollback()
 
         return {"predictions": prediction_results_list}
 
-    except HTTPException as http_exc: # Repropager les HTTPException
+    except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
-        logger.error(f"Erreur dans /predict_bulk : {e}", exc_info=True)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Erreur interne : {e}")
+        logger.error(f"Erreur inattendue dans l'endpoint /predict_bulk : {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Une erreur interne s'est produite lors du traitement de votre requête en masse.",
+        )

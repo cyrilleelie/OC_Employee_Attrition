@@ -30,14 +30,20 @@ DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NA
 API_TITLE = "API de Prédiction d'Attrition RH"
 API_VERSION = "0.1.0"
 
-# --- AJOUT DES MAPPINGS ET CATÉGORIES ICI ---
+ENABLE_API_DB_LOGGING = os.getenv("ENABLE_API_DB_LOGGING", "false").lower() == "true"
+
 BINARY_FEATURES_MAPPING = {
-    "genre": {"M": 0, "F": 1},  # Adaptez si 'Masculin'/'Féminin' etc.
-    "heure_supplementaires": {"Non": 0, "Oui": 1},  # Adaptez 'Non'/'Oui' si nécessaire.
+    "genre": {"M": 0, "F": 1},
+    "heure_supplementaires": {"Non": 0, "Oui": 1}
 }
 
 ORDINAL_FEATURES_CATEGORIES = {
-    "frequence_deplacement": ["Aucun", "Occasionnel", "Frequent"],
-    # Ajoutez vos autres colonnes ordinales et leurs catégories ordonnées ici
+    "frequence_deplacement": ["Aucun", "Occasionnel", "Frequent"]
 }
-# --- FIN AJOUT ---
+
+LIMITED_VALUES_FEATURES = {
+    "statut_marital": ["Célibataire", "Marié(e)", "Divorcé(e)"],
+    "departement": ["Commercial", "Consulting", "Ressources Humaines"],
+    "poste": ["Cadre Commercial", "Assistant de Direction", "Consultant", "Tech Lead", "Manager", "Représentant Commercial", "Directeur Technique", "Senior Manager", "Ressources Humaines"],
+    "domaine_etude": ["Infra & Cloud", "Autre", "Transformation Digitale", "Marketing", "Entrepreunariat", "Ressources Humaines"]
+}
