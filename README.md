@@ -5,32 +5,43 @@ colorFrom: indigo
 colorTo: green
 sdk: docker
 app_port: 8000
-license: mit # Ou apache-2.0, etc. - Mettez la licence que vous souhaitez
+license: mit
 ---
 
 # Projet : Prédiction de l'Attrition des Employés et API
 
-Ce projet a pour objectif d'analyser les données RH afin de construire un modèle de Machine Learning capable de prédire le départ volontaire (attrition) des employés. Le modèle est ensuite exposé via une API RESTful construite avec FastAPI, prête à être déployée, et les interactions avec l'API sont enregistrées dans une base de données PostgreSQL.
+Ce projet a pour objectif d'analyser les données RH afin de construire un modèle de Machine Learning capable de prédire le départ volontaire (attrition) des employés. Le modèle est ensuite exposé via une API RESTful construite avec FastAPI, conteneurisée avec Docker, et déployée sur Hugging Face Spaces. Une documentation complète du projet et de l'API est également générée et déployée.
+
+## 📚 Documentation Détaillée
+
+Pour une documentation complète du projet, incluant le guide d'installation, les détails techniques du modèle, des exemples d'utilisation de l'API, le guide de contribution, et la référence de l'API générée à partir du code source, veuillez consulter :
+
+➡️ **[Site de Documentation Déployé sur GitHub Pages](https://cyrilleelie.github.io/OC_Employee_Attrition/)**
+
+*(Remplacez le lien ci-dessus par l'URL réelle de votre site GitHub Pages une fois qu'il sera actif).*
 
 ## 🎯 Objectifs
 
-* **Analyser** les facteurs clés influençant l'attrition des employés.
-* **Construire et Entraîner** un modèle de classification binaire performant.
-* **Développer une API** pour obtenir des prédictions en temps réel pour un ou plusieurs employés.
-* **Intégrer une base de données PostgreSQL** pour la gestion des données d'entraînement et l'enregistrement des prédictions de l'API.
-* **Conteneuriser** l'application avec Docker pour un déploiement facile de l'API.
-* **Déployer** l'API sur Hugging Face Spaces.
+* Analyser les facteurs clés influençant l'attrition des employés.
+* Construire et Entraîner un modèle de classification binaire performant.
+* Développer une API pour obtenir des prédictions en temps réel.
+* Intégrer une base de données PostgreSQL pour la gestion des données d'entraînement locales et l'enregistrement des prédictions de l'API locale.
+* Conteneuriser l'application API avec Docker.
+* Mettre en place un pipeline CI/CD robuste (tests, linting, build, déploiement de la documentation, création de releases).
+* Déployer l'API sur Hugging Face Spaces.
+* Produire une documentation technique et utilisateur complète.
 
 ## 🛠️ Technologies Utilisées
 
 * **Langage :** Python 3.12
 * **Analyse & ML :** Pandas, NumPy, Scikit-learn, Joblib
 * **API :** FastAPI, Uvicorn, Pydantic
-* **Base de Données :** PostgreSQL, SQLAlchemy
+* **Base de Données (Locale) :** PostgreSQL, SQLAlchemy
 * **Gestion de Dépendances :** Poetry
-* **Conteneurisation :** Docker, Docker Compose (pour la BDD locale)
-* **Déploiement :** Hugging Face Spaces
-* **CI/CD :** GitHub Actions
+* **Conteneurisation :** Docker, Docker Compose
+* **Documentation :** Sphinx, MyST-Parser, Sphinx-RTD-Theme, AutoAPI, GitHub Pages
+* **CI/CD & Versioning :** Git, GitHub, GitHub Actions
+* **Déploiement API :** Hugging Face Spaces
 
 ## 📂 Structure du Projet
 
@@ -38,122 +49,72 @@ Le projet est organisé de la manière suivante :
 
 ```text
 mon_projet_attrition/
+│
 ├── .github/
 │   └── workflows/
-│       └── ci.yml
+│       ├── ci.yml            # Workflow CI (tests, lint, build docker)
+│       └── deploy-docs.yml   # Workflow CD (déploiement documentation)
+│       └── release.yml       # Workflow CD (création release GitHub)
 ├── .gitignore
-├── .env.example
-├── Dockerfile
-├── README.md
-├── docker-compose.yml
+├── .env.example            # Exemple pour variables d'environnement locales (BDD)
+├── Dockerfile              # Pour l'image Docker de l'API
+├── README.md               # Ce fichier
+├── docker-compose.yml      # Pour lancer PostgreSQL localement
 ├── poetry.lock
-├── pyproject.toml
-├── requirements.txt
+├── pyproject.toml          # Dépendances et configuration Poetry
+├── requirements.txt        # Export pour Docker/HF
+│
 ├── data/
-│   └── raw/
-        ├── extrait_sirh.csv
-        ├── extrait_eval.csv
-│       └── extrait_sondage.csv
-├── models/
-│   └── attrition_model.joblib
-├── notebooks/
-│   └── (vos notebooks ici, ex: 01_exploration.ipynb)
+│   └── raw/                # Données CSV brutes initiales
+│
+├── docs_sphinx/            # Fichiers source de la documentation Sphinx
+│   ├── source/
+│   │   ├── conf.py         # Configuration Sphinx
+│   │   ├── index.rst       # Page d'accueil de la documentation Sphinx
+│   │   ├── installation_guide.rst
+│   │   ├── model_documentation.md
+│   │   ├── api_usage_examples.md
+│   │   └── contributing.md
+│   └── Makefile            # Pour construire la doc Sphinx localement
+│
+├── models/                 # Modèles ML entraînés (.joblib)
+│
+├── notebooks/              # Notebooks d'exploration initiaux
+│
 ├── scripts/
-│   └── populate_employees_table.py
-├── src/
-│   ├── __init__.py
-│   ├── api/
-│   │   ├── __init__.py
-│   │   ├── main.py
-│   │   └── schemas.py
-│   ├── config.py
-│   ├── data_processing/
-│   │   ├── __init__.py
-│   │   ├── load_data.py
-│   │   └── preprocess.py
-│   ├── database/
-│   │   ├── __init__.py
-│   │   ├── database_setup.py
-│   │   ├── init_db.py
-│   │   └── models.py
-│   └── modeling/
-│       ├── __init__.py
-│       ├── predict.py
-│       └── train_model.py
+│   └── populate_employees_table.py # Script de peuplement BDD
+│
+├── src/                    # Code source de l'application
+│   ├── api/                # Code de l'API FastAPI
+│   ├── config.py           # Configurations globales
+│   ├── data_processing/    # Modules de chargement et preprocessing
+│   ├── database/           # Modules BDD (setup, models, init_db)
+│   └── modeling/           # Modules d'entraînement et prédiction
+│
 └── tests/
-    ├── __init__.py
-    ├── functional/
-    │   ├── __init__.py
-    │   └── test_api.py
-    └── unit/
-        ├── __init__.py
-        └── test_preprocess.py
+    ├── unit/               # Tests unitaires
+    └── functional/         # Tests fonctionnels/API
 ```
 
 ## 🚀 Installation et Configuration Locale
 
-**Prérequis :**
+Les instructions détaillées pour l'installation locale, la configuration de la base de données PostgreSQL avec Docker, et l'initialisation des données se trouvent dans notre documentation :
 
-* [Git](https://git-scm.com/)
-* [Python 3.12+](https://www.python.org/)
-* [Poetry](https://python-poetry.org/docs/#installation) (pour la gestion des dépendances Python)
-* [Docker Desktop](https://www.docker.com/products/docker-desktop/) (ou Docker Engine + Docker Compose séparément sur Linux) pour la base de données PostgreSQL.
+➡️ **[Consulter le Guide d'Installation Détaillé](https://cyrilleelie.github.io/OC_Employee_Attrition/installation_guide.html)**
 
-**Étapes :**
+*(Assurez-vous que ce lien pointe vers la bonne page une fois la documentation déployée).*
 
-1.  **Clonez le repository :**
-    ```bash
-    git clone [URL_DE_VOTRE_REPO_GITHUB]
-    cd mon_projet_attrition
-    ```
+En résumé rapide :
+1.  Clonez le dépôt.
+2.  Installez Poetry.
+3.  Exécutez `poetry install`.
+4.  Configurez votre fichier `.env` à partir de `.env.example`.
+5.  Lancez PostgreSQL : `docker-compose up -d`.
+6.  Initialisez la BDD : `poetry run python -m src.database.init_db`.
+7.  Peuplez la BDD : `poetry run python -m scripts.populate_employees_table`.
+8.  Activez l'environnement : `poetry shell`.
 
-2.  **Installez les dépendances Python avec Poetry :**
-    ```bash
-    poetry install
-    ```
-    *(Cela créera un environnement virtuel et installera toutes les dépendances listées dans `pyproject.toml`)*.
-
-3.  **Configurez les Variables d'Environnement pour la Base de Données :**
-    * Copiez le fichier d'exemple `.env.example` en `.env` :
-        ```bash
-        cp .env.example .env
-        ```
-    * Modifiez le fichier `.env` avec vos propres identifiants pour la base de données locale. Ce fichier est ignoré par Git.
-        ```env
-        # .env - VOS SECRETS LOCAUX
-        POSTGRES_USER=votre_user_pg
-        POSTGRES_PASSWORD=votre_mot_de_passe_pg_solide
-        POSTGRES_DB=attrition_db_dev
-        DB_HOST_PORT=5432
-        ```
-
-4.  **Démarrez le Service PostgreSQL avec Docker Compose :**
-    Assurez-vous que Docker Desktop est en cours d'exécution.
-    ```bash
-    docker-compose up -d
-    ```
-    * Pour arrêter le service : `docker-compose down`
-    * Pour voir les logs de la base de données : `docker-compose logs db`
-
-5.  **Initialisez la Base de Données (Création des Tables) :**
-    Activez d'abord l'environnement Poetry si ce n'est pas déjà fait (`poetry shell`).
-    ```bash
-    poetry run python -m src.database.init_db
-    ```
-
-6.  **Peuplez la Table `employees` (Données Initiales) :**
-    Ce script charge les données des CSV, les nettoie et les insère dans la table `employees`.
-    ```bash
-    poetry run python -m scripts.populate_employees_table
-    ```
-
-7.  **Activez l'Environnement Virtuel Poetry (si pas déjà fait) :**
-    ```bash
-    poetry shell
-    ```
-    *(Votre terminal est maintenant configuré pour utiliser l'interpréteur Python et les librairies de cet environnement).*
-
-## 📈 Usage
+## 📈 Usage Local
 
 *(Assurez-vous d'être dans l'environnement Poetry : `poetry shell`, et que votre base de données PostgreSQL Docker est démarrée).*
 
@@ -168,70 +129,27 @@ mon_projet_attrition/
     ```bash
     uvicorn src.api.main:app --reload
     ```
-    *(Le serveur démarrera sur `http://127.0.0.1:8000`. `--reload` permet le redémarrage automatique lors de modifications).*
+    *(API accessible sur `http://127.0.0.1:8000`. Les appels sont loggués en BDD locale si `ENABLE_API_DB_LOGGING=true` dans `.env`)*.
+
+3.  **Construire et Consulter la Documentation Sphinx Localement :**
+    ```bash
+    cd docs_sphinx
+    poetry run make html
+    # Puis ouvrez docs_sphinx/build/html/index.html dans votre navigateur.
+    ```
 
 ## 🔌 API Endpoints
 
-Une fois l'API lancée :
-
 * **Documentation Interactive (Swagger UI) :** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-    * Explorez et testez les endpoints ici.
+* **Référence API (ReDoc) :** [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
 * **Health Check :** `GET /`
 * **Prédiction Unique :** `POST /predict`
 * **Prédiction en Masse :** `POST /predict_bulk`
 
-Les appels à `/predict` et `/predict_bulk` sont enregistrés dans la table `api_prediction_logs` de la base de données PostgreSQL.
+Des exemples d'appels sont disponibles dans la [documentation détaillée](https://cyrilleelie.github.io/OC_Employee_Attrition/api_usage_examples.html).
 
 ## ✅ Tests
 
-Pour lancer la suite de tests (unitaires et fonctionnels) :
+Pour lancer la suite de tests et voir la couverture :
 ```bash
-poetry run pytest
-```
-
-## 🗣️ Exemples d'Utilisation de l'API
-
-L'API peut être testée interactivement via l'interface Swagger UI disponible à l'endpoint `/docs` lorsque le serveur API est lancé.
-
-Pour des exemples de code permettant d'interagir avec l'API par programmation en utilisant `curl` (ligne de commande) ou Python (avec la librairie `requests`), veuillez consulter le document suivant :
-
-➡️ **[Exemples d'Utilisation de l'API](./docs/API_USAGE_EXAMPLES.md)**
-
-Voici un test rapide pour vérifier que l'API est en ligne (nécessite que l'API tourne sur `http://127.0.0.1:8000` et que `curl` soit installé) :
-
-```bash
-curl -X GET "[http://127.0.0.1:8000/](http://127.0.0.1:8000/)"
-```
-
-## 🛠️ Maintenance et Protocole de Mise à Jour
-
-Pour assurer la pertinence et la performance continue de ce modèle de prédiction d'attrition, le protocole de mise à jour suivant est envisagé :
-
-1.  **Surveillance des Performances :**
-    * Les prédictions de l'API étant enregistrées dans la table `api_prediction_logs`, il sera possible (avec un outillage futur) de comparer ces prédictions aux départs réels observés pour évaluer la performance du modèle en continu.
-    * Une baisse significative des métriques clés (ex: F2-score, rappel pour la classe "départ") indiquera un besoin de ré-évaluation.
-
-2.  **Ré-entraînement du Modèle :**
-    * **Fréquence :** Un ré-entraînement est à envisager :
-        * Périodiquement (ex: tous les 6 mois ou annuellement) avec les données les plus récentes de la table `employees`.
-        * Lorsque de nouvelles features pertinentes sont identifiées et ajoutées.
-        * Si une dérive significative des données d'entrée est détectée.
-        * Si les performances du modèle en production baissent en dessous d'un seuil acceptable.
-    * **Procédure :** Le script `src/modeling/train_model.py` est utilisé pour le ré-entraînement. Le nouveau modèle sauvegardé devra ensuite être redéployé.
-
-3.  **Mise à Jour des Données d'Entraînement :**
-    * Un processus régulier (à définir) pour mettre à jour la table `employees` avec les données RH les plus récentes est nécessaire pour que les ré-entraînements soient basés sur des informations à jour. Cela pourrait impliquer de relancer périodiquement une version adaptée de `scripts/populate_employees_table.py` ou un pipeline ETL plus robuste.
-
-4.  **Revue des Features :**
-    * Périodiquement, il est bon de revoir la pertinence des features utilisées et d'explorer si de nouvelles données disponibles pourraient améliorer le modèle.
-
-5.  **Mise à Jour des Dépendances :**
-    * Les dépendances du projet (Python, librairies) doivent être mises à jour régulièrement pour des raisons de sécurité et pour bénéficier des dernières améliorations.
-    * Utiliser `poetry show --outdated` pour identifier les dépendances obsolètes.
-    * Mettre à jour avec `poetry update <nom_librairie>` ou `poetry update`.
-    * **Crucial :** Après une mise à jour des dépendances, relancer l'intégralité des tests et potentiellement un ré-entraînement/évaluation pour s'assurer de la non-régression.
-
-6.  **Documentation :**
-    * Toute modification significative du modèle, des features, de l'architecture, ou du processus de ré-entraînement doit être reflétée dans cette documentation.
-
-Ce protocole initial servira de base et pourra être affiné avec le temps et l'expérience acquise sur le modèle en production (ou en simulation de production).
+poetry run pytest --cov=src tests/
