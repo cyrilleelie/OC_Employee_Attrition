@@ -1,0 +1,69 @@
+name: Deploy Sphinx Documentation to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # Déclencher à chaque push sur la branche main
+    paths: # Optionnel : ne déclencher que si les fichiers de docs ou le code source changent
+      - 'docs_sphinx/**'
+      - 'src/**'
+      - 'pyproject.toml'
+      - 'poetry.lock'
+      - '.github/workflows/deploy-docs.yml' # Le workflow lui-même
+  workflow_dispatch: # Permet de lancer le workflow manuellement depuis l'onglet Actions
+
+jobs:
+  deploy:
+    name: Deploy Documentation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Nécessaire pour pousser vers la branche gh-pages
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Nécessaire pour certains générateurs de changelog ou si vous référencez des tags
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12' # Votre version de Python
+
+      - name: Installation de Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 'latest'
+          virtualenvs-create: true
+          virtualenvs-in-project: true # Crée .venv dans le projet
+
+      - name: Chargement du cache des dépendances Poetry
+        id: cached-poetry-dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
+      - name: Installation des dépendances (y compris celles de documentation)
+        # S'exécute si le cache n'est pas trouvé ou si .venv n'est pas là
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root # Installe toutes les dépendances (y compris dev/docs)
+
+      - name: Build Sphinx documentation
+        run: |
+          cd docs_sphinx 
+          poetry run make html 
+          # Ou si vous n'utilisez pas make:
+          # poetry run sphinx-build -b html source build/html
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3 # Action populaire pour déployer sur GitHub Pages
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs_sphinx/build/html # Le dossier contenant votre documentation HTML construite
+          # publish_branch: gh-pages # Branche sur laquelle publier (gh-pages par défaut)
+          # user_name: 'github-actions[bot]' # Nom du commiteur (optionnel)
+          # user_email: 'github-actions[bot]@users.noreply.github.com' # Email du commiteur (optionnel)
+          # cname: docs.votredomaine.com # Si vous avez un domaine personnalisé (optionnel)
