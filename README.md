@@ -18,8 +18,6 @@ Pour une documentation complète du projet, incluant le guide d'installation, le
 
 ➡️ **[Site de Documentation Déployé sur GitHub Pages](https://cyrilleelie.github.io/OC_Employee_Attrition/)**
 
-*(Remplacez le lien ci-dessus par l'URL réelle de votre site GitHub Pages une fois qu'il sera actif).*
-
 ## 🎯 Objectifs
 
 * Analyser les facteurs clés influençant l'attrition des employés.
@@ -101,8 +99,6 @@ mon_projet_attrition/
 Les instructions détaillées pour l'installation locale, la configuration de la base de données PostgreSQL avec Docker, et l'initialisation des données se trouvent dans notre documentation :
 
 ➡️ **[Consulter le Guide d'Installation Détaillé](https://cyrilleelie.github.io/OC_Employee_Attrition/installation_guide.html)**
-
-*(Assurez-vous que ce lien pointe vers la bonne page une fois la documentation déployée).*
 
 En résumé rapide :
 1.  Clonez le dépôt.
