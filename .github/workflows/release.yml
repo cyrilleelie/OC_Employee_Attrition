@@ -1,0 +1,57 @@
+name: Deploy to Hugging Face Spaces and Create GitHub Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*' # Se déclenche sur les tags comme v1.0.0, v0.2.1, etc.
+
+jobs:
+  deploy_and_release:
+    name: Deploy to HF Space & Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Nécessaire pour créer une release GitHub
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Récupère tout l'historique pour un changelog potentiel
+
+      - name: Set up Git user for HF push
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+      
+      - name: Push to Hugging Face Spaces
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_SPACE_ID: ${{ secrets.HF_SPACE_ID }} # Ex: VotreNomHF/NomDuSpace
+        run: |
+          echo "Deploying tag ${{ github.ref_name }} to Hugging Face Space: ${HF_SPACE_ID}"
+          # Ajoute le remote pour le Space Hugging Face en utilisant le token pour l'authentification
+          # La branche sur le Space HF est généralement 'main'
+          git remote add space "https://user:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE_ID}"
+          
+          # Pousse le tag actuel vers la branche 'main' du Space HF
+          # --force est souvent nécessaire car l'historique du Space peut diverger
+          # ou pour s'assurer que la branche main du Space reflète exactement ce tag.
+          git push --force space "${{ github.ref_name }}:refs/heads/main"
+          echo "Code pushed to Hugging Face Space successfully."
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            Release ${{ github.ref_name }} du projet d'attrition RH.
+            
+            **Changements principaux :**
+            *(À remplir manuellement lors de la création du tag, ou générer un changelog ici)*
+            
+            Déployé sur Hugging Face Spaces.
+          draft: false
+          prerelease: false # Mettre à true pour les pré-releases (ex: v1.0.0-beta)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
