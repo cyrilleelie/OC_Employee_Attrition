@@ -1,9 +1,7 @@
 """
 Module principal de l'API FastAPI pour la prédiction d'attrition des employés.
 
-Définit les endpoints de l'API, gère le cycle de vie de l'application (chargement du modèle),
-valide les données d'entrée, appelle la logique de prédiction, et enregistre
-les interactions dans une base de données PostgreSQL.
+Définit les endpoints de l'API, gère le cycle de vie de l'application (chargement du modèle), valide les données d'entrée, appelle la logique de prédiction, et enregistre les interactions dans une base de données PostgreSQL.
 """
 
 from fastapi import FastAPI, HTTPException, status, Depends

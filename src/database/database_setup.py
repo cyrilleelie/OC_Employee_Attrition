@@ -1,10 +1,7 @@
 """
 Configuration centrale de SQLAlchemy pour la connexion à la base de données.
 
-Ce module initialise l'objet `engine` de SQLAlchemy, la fabrique de sessions `SessionLocal`,
-et la classe de base déclarative `Base` pour les modèles ORM. Il fournit également
-une fonction de dépendance (`get_db`) pour FastAPI afin de gérer les sessions
-de base de données par requête.
+Ce module initialise l'objet `engine` de SQLAlchemy, la fabrique de sessions `SessionLocal`, et la classe de base déclarative `Base` pour les modèles ORM. Il fournit également une fonction de dépendance (`get_db`) pour FastAPI afin de gérer les sessions de base de données par requête.
 """
 
 from sqlalchemy import create_engine

@@ -1,11 +1,9 @@
 """
 Module pour le chargement et la préparation initiale des données.
 
-Fonctions pour charger les données brutes depuis des fichiers CSV,
-les fusionner, et préparer les clés de jointure. Fournit également des fonctions
-pour charger les données depuis une base de données PostgreSQL une fois peuplée.
-La fonction principale `get_data` sert d'interface pour obtenir les données
-pour le reste de l'application, typiquement pour l'entraînement du modèle.
+Fonctions pour charger les données brutes depuis des fichiers CSV, les fusionner, et préparer les clés de jointure. Fournit également des fonctions pour charger les données depuis une base de données PostgreSQL une fois peuplée.
+La fonction principale `get_data` sert d'interface pour obtenir les données pour le reste de l'application, typiquement pour l'entraînement du modèle.
+
 """
 
 import pandas as pd

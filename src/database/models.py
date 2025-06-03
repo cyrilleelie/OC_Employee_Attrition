@@ -1,10 +1,8 @@
 """
 Définition des modèles SQLAlchemy ORM pour les tables de la base de données.
 
-Ce module contient les classes Python qui mappent aux tables de la base de données
-PostgreSQL, en utilisant la Base déclarative de SQLAlchemy.
-Chaque classe représente une table, et ses attributs de classe représentent
-les colonnes de cette table.
+Ce module contient les classes Python qui mappent aux tables de la base de données PostgreSQL, en utilisant la Base déclarative de SQLAlchemy.
+Chaque classe représente une table, et ses attributs de classe représentent les colonnes de cette table.
 """
 
 from sqlalchemy import Column, Integer, String, Float, DateTime, JSON

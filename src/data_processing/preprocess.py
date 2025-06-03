@@ -3,14 +3,13 @@
 Module de prétraitement des données pour le projet d'attrition RH.
 
 Ce module contient les fonctions nécessaires pour :
-- Mapper les features binaires.
-- Nettoyer les données brutes (conversion de la cible, suppression de colonnes,
-  gestion des doublons, conversion de types spécifiques comme les pourcentages).
-- Créer de nouvelles features (feature engineering) - actuellement un placeholder.
-- Construire une pipeline de prétraitement Scikit-learn (ColumnTransformer) pour
-  l'imputation, la mise à l'échelle des numériques, et l'encodage des catégorielles
-  (OneHot et Ordinal).
-- Exécuter l'ensemble de ce pipeline de preprocessing.
+
+* Mapper les features binaires.
+* Nettoyer les données brutes (conversion de la cible, suppression de colonnes, gestion des doublons, conversion de types spécifiques comme les pourcentages).
+* Créer de nouvelles features (feature engineering) - actuellement un placeholder.
+* Construire une pipeline de prétraitement Scikit-learn (ColumnTransformer) pour l'imputation, la mise à l'échelle des numériques, et l'encodage des catégorielles (OneHot et Ordinal).
+* Exécuter l'ensemble de ce pipeline de preprocessing.
+
 """
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, OrdinalEncoder

@@ -2,9 +2,11 @@
 Définition des schémas Pydantic pour la validation des données de l'API.
 
 Ce module contient les modèles de données utilisés par FastAPI pour :
-- Valider les données des requêtes entrantes.
-- Sérialiser les données des réponses sortantes.
-- Générer automatiquement la documentation OpenAPI (Swagger UI).
+
+* Valider les données des requêtes entrantes.
+* Sérialiser les données des réponses sortantes.
+* Générer automatiquement la documentation OpenAPI (Swagger UI).
+
 """
 
 from pydantic import BaseModel, Field, ConfigDict, field_validator

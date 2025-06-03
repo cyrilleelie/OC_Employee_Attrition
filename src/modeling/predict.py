@@ -2,10 +2,10 @@
 Module pour charger la pipeline de Machine Learning entraînée et effectuer des prédictions.
 
 Fonctions principales :
-- `load_prediction_pipeline()`: Charge la pipeline Scikit-learn sauvegardée (modèle + préprocesseur).
-- `predict_attrition()`: Prend des données brutes d'employés en entrée (DataFrame),
-  applique les transformations de preprocessing initiales, puis utilise la pipeline
-  chargée pour prédire la probabilité d'attrition et la classe de départ.
+
+* `load_prediction_pipeline()`: Charge la pipeline Scikit-learn sauvegardée (modèle + préprocesseur).
+* `predict_attrition()`: Prend des données brutes d'employés en entrée (DataFrame), applique les transformations de preprocessing initiales, puis utilise la pipeline chargée pour prédire la probabilité d'attrition et la classe de départ.
+
 """
 
 import pandas as pd

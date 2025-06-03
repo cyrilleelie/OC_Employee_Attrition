@@ -2,18 +2,18 @@
 Module d'entraînement et d'évaluation du modèle de prédiction d'attrition.
 
 Ce script orchestre le pipeline complet de Machine Learning :
+
 1. Chargement des données prétraitées depuis la source configurée (PostgreSQL).
 2. (Optionnel) Création de features supplémentaires.
 3. Séparation des données en ensembles d'entraînement et de test.
 4. Identification des types de colonnes pour le preprocessing.
 5. Construction d'une pipeline Scikit-learn incluant :
-    - Un préprocesseur (ColumnTransformer) pour imputer, scaler (numériques)
-      et encoder (catégorielles OneHot et Ordinal).
-    - Un classifieur (actuellement LogisticRegression).
+    * Un préprocesseur (ColumnTransformer) pour imputer, scaler (numériques) et encoder (catégorielles OneHot et Ordinal).
+    * Un classifieur (actuellement LogisticRegression).
 6. Entraînement de la pipeline complète sur les données d'entraînement.
-7. Évaluation du modèle sur les données de test (Matrice de confusion, rapport de
-   classification, F2-score).
+7. Évaluation du modèle sur les données de test (Matrice de confusion, rapport de classification, F2-score).
 8. Sauvegarde de la pipeline entraînée pour une utilisation ultérieure (prédictions).
+
 """
 
 import numpy as np

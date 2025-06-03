@@ -1,14 +1,9 @@
 """
 Script pour initialiser la base de données.
 
-Ce module contient la logique pour créer toutes les tables définies
-dans les modèles SQLAlchemy (via src.database.models) dans la base de données
-configurée (via src.database.database_setup.engine).
+Ce module contient la logique pour créer toutes les tables définies dans les modèles SQLAlchemy (via src.database.models) dans la base de données configurée (via src.database.database_setup.engine).
 
-Ce script est généralement exécuté une fois pour mettre en place le schéma
-de la base de données, ou après des modifications de schéma si les tables
-doivent être recréées (attention, la recréation peut entraîner une perte de données
-si les tables existent déjà et ne sont pas vidées au préalable).
+Ce script est généralement exécuté une fois pour mettre en place le schéma de la base de données, ou après des modifications de schéma si les tables doivent être recréées (attention, la recréation peut entraîner une perte de données si les tables existent déjà et ne sont pas vidées au préalable).
 """
 
 import logging
