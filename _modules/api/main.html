@@ -1,0 +1,436 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>api.main &mdash; Documentation Attrition RH API v0.2.1</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=44cc1bf8"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Attrition RH API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenu:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation_guide.html">Guide d’Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model_documentation.html">Documentation Technique du Modèle de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_usage_examples.html">Exemples d’Utilisation de l’API de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Guide de Contribution au Projet d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Attrition RH API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">api.main</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de api.main</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module principal de l&#39;API FastAPI pour la prédiction d&#39;attrition des employés.</span>
+
+<span class="sd">Définit les endpoints de l&#39;API, gère le cycle de vie de l&#39;application (chargement du modèle), valide les données d&#39;entrée, appelle la logique de prédiction, et enregistre les interactions dans une base de données PostgreSQL.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">HTTPException</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">Depends</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">contextlib</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">asynccontextmanager</span><span class="p">,</span>
+<span class="p">)</span>  <span class="c1"># Pour le gestionnaire de cycle de vie (lifespan)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="n">Session</span>  <span class="c1"># Pour l&#39;injection de dépendance de la session BDD</span>
+
+<span class="c1"># Importe les schémas Pydantic pour la validation et la sérialisation des données</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.schemas</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">EmployeeInput</span><span class="p">,</span>
+    <span class="n">PredictionOutput</span><span class="p">,</span>
+    <span class="n">BulkPredictionInput</span><span class="p">,</span>
+    <span class="n">BulkPredictionOutput</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Importe la logique de prédiction et de chargement du modèle</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.modeling.predict</span><span class="w"> </span><span class="kn">import</span> <span class="n">predict_attrition</span><span class="p">,</span> <span class="n">load_prediction_pipeline</span>
+
+<span class="c1"># Importe les configurations globales du projet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
+
+<span class="c1"># Imports pour l&#39;interaction avec la base de données</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.database.database_setup</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_db</span>  <span class="c1"># Dépendance pour la session BDD</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.database.models</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ApiPredictionLog</span><span class="p">,</span>
+<span class="p">)</span>  <span class="c1"># Modèle SQLAlchemy pour les logs de prédiction</span>
+
+<span class="c1"># Configuration de base du logging pour ce module</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(name)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<div class="viewcode-block" id="logger">
+<a class="viewcode-back" href="../../autoapi/api/main/index.html#api.main.logger">[docs]</a>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+
+<span class="nd">@asynccontextmanager</span>
+<div class="viewcode-block" id="lifespan">
+<a class="viewcode-back" href="../../autoapi/api/main/index.html#api.main.lifespan">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">lifespan</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Gestionnaire de cycle de vie (lifespan) pour l&#39;application FastAPI.</span>
+
+<span class="sd">    Est exécuté au démarrage et à l&#39;arrêt de l&#39;application.</span>
+<span class="sd">    Utilisé ici pour charger la pipeline de prédiction au démarrage.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s2">&quot;Démarrage de l&#39;application API : Tentative de chargement de la pipeline de prédiction...&quot;</span>
+    <span class="p">)</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">load_prediction_pipeline</span><span class="p">()</span>
+    <span class="p">)</span>  <span class="c1"># Tente de charger la pipeline stockée globalement dans predict.py</span>
+    <span class="k">if</span> <span class="n">pipeline</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s2">&quot;ÉCHEC CRITIQUE du chargement de la pipeline au démarrage. &quot;</span>
+            <span class="s2">&quot;L&#39;API pourrait ne pas être en mesure de faire des prédictions.&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Pipeline de prédiction chargée avec succès au démarrage.&quot;</span><span class="p">)</span>
+    <span class="k">yield</span>  <span class="c1"># L&#39;application s&#39;exécute ici</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Arrêt de l&#39;application API.&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Initialisation de l&#39;application FastAPI avec le gestionnaire de cycle de vie</span>
+<div class="viewcode-block" id="app">
+<a class="viewcode-back" href="../../autoapi/api/main/index.html#api.main.app">[docs]</a>
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span>
+    <span class="n">title</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">API_TITLE</span><span class="p">,</span>
+    <span class="n">version</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">API_VERSION</span><span class="p">,</span>
+    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Une API pour prédire le risque d&#39;attrition des employés, avec enregistrement des prédictions.&quot;</span><span class="p">,</span>
+    <span class="n">lifespan</span><span class="o">=</span><span class="n">lifespan</span><span class="p">,</span>
+<span class="p">)</span></div>
+
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Health Check&quot;</span><span class="p">],</span> <span class="n">summary</span><span class="o">=</span><span class="s2">&quot;Vérification de l&#39;état de l&#39;API&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="read_root">
+<a class="viewcode-back" href="../../autoapi/api/main/index.html#api.main.read_root">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">read_root</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Endpoint racine pour vérifier la disponibilité et la version de l&#39;API.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Bienvenue sur l&#39;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">API_TITLE</span><span class="si">}</span><span class="s2"> - v</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">API_VERSION</span><span class="si">}</span><span class="s2">. Accédez à /docs pour la documentation interactive.&quot;</span>
+    <span class="p">}</span></div>
+
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="s2">&quot;/predict&quot;</span><span class="p">,</span>
+    <span class="n">response_model</span><span class="o">=</span><span class="n">PredictionOutput</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Predictions&quot;</span><span class="p">],</span>
+    <span class="n">summary</span><span class="o">=</span><span class="s2">&quot;Prédire l&#39;attrition pour un seul employé&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<div class="viewcode-block" id="predict_single">
+<a class="viewcode-back" href="../../autoapi/api/main/index.html#api.main.predict_single">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">predict_single</span><span class="p">(</span>
+    <span class="n">employee_data</span><span class="p">:</span> <span class="n">EmployeeInput</span><span class="p">,</span>  <span class="c1"># Données d&#39;entrée validées par Pydantic</span>
+    <span class="n">db</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_db</span><span class="p">),</span>  <span class="c1"># Injection de la session de base de données</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prédit le risque d&#39;attrition pour un seul employé.</span>
+
+<span class="sd">    Les données de l&#39;employé sont fournies dans le corps de la requête au format JSON.</span>
+<span class="sd">    La prédiction (probabilité et classe) est retournée.</span>
+<span class="sd">    L&#39;input et l&#39;output de la prédiction sont enregistrés en base de données.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">load_prediction_pipeline</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Vérifie si la pipeline globale est chargée</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s2">&quot;Tentative d&#39;appel à /predict alors que la pipeline n&#39;est pas chargée.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Modèle de prédiction non disponible. Veuillez réessayer plus tard.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># L&#39;index est utilisé par predict_attrition pour le champ &#39;id_employe&#39; de la sortie.</span>
+        <span class="c1"># Un identifiant unique pour cette requête serait idéal.</span>
+        <span class="n">temp_index_for_df</span> <span class="o">=</span> <span class="s2">&quot;PREDICT_SINGLE_REQUEST&quot;</span>  <span class="c1"># Pourrait être un UUID généré</span>
+
+        <span class="c1"># Conversion des données Pydantic en DataFrame Pandas pour la fonction de prédiction</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">employee_data</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">temp_index_for_df</span><span class="p">])</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Requête /predict reçue pour l&#39;employé (index temporaire: </span><span class="si">{</span><span class="n">temp_index_for_df</span><span class="si">}</span><span class="s2">). &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Données : </span><span class="si">{</span><span class="n">employee_data</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(</span><span class="n">exclude_none</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Appel à la logique de prédiction</span>
+        <span class="n">prediction_results_list</span> <span class="o">=</span> <span class="n">predict_attrition</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+        <span class="c1"># Gestion des erreurs retournées par predict_attrition</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">prediction_results_list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="s2">&quot;error&quot;</span> <span class="ow">in</span> <span class="n">prediction_results_list</span>
+        <span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Erreur retournée par predict_attrition: </span><span class="si">{</span><span class="n">prediction_results_list</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_500_INTERNAL_SERVER_ERROR</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="n">prediction_results_list</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">prediction_results_list</span><span class="p">:</span>  <span class="c1"># Devrait être une liste d&#39;un élément</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;predict_attrition n&#39;a retourné aucun résultat pour une prédiction unique.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_500_INTERNAL_SERVER_ERROR</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;La prédiction a échoué à produire un résultat.&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="n">single_prediction_result</span> <span class="o">=</span> <span class="n">prediction_results_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Enregistrement en base de données</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">ENABLE_API_DB_LOGGING</span><span class="p">:</span>  <span class="c1"># Utilisation de la variable de configuration</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: Entrée dans le bloc de logging BDD&quot;</span><span class="p">)</span>  <span class="c1"># DEBUG</span>
+                <span class="n">log_entry</span> <span class="o">=</span> <span class="n">ApiPredictionLog</span><span class="p">(</span>
+                    <span class="n">employee_id_concerne</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span>
+                        <span class="n">single_prediction_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id_employe&quot;</span><span class="p">,</span> <span class="n">temp_index_for_df</span><span class="p">)</span>
+                    <span class="p">),</span>
+                    <span class="n">input_data</span><span class="o">=</span><span class="n">employee_data</span><span class="o">.</span><span class="n">model_dump</span><span class="p">(),</span>  <span class="c1"># Stocke le dictionnaire complet des données d&#39;entrée</span>
+                    <span class="n">prediction_probabilite</span><span class="o">=</span><span class="n">single_prediction_result</span><span class="p">[</span>
+                        <span class="s2">&quot;probabilite_depart&quot;</span>
+                    <span class="p">],</span>
+                    <span class="n">prediction_classe</span><span class="o">=</span><span class="n">single_prediction_result</span><span class="p">[</span><span class="s2">&quot;prediction_depart&quot;</span><span class="p">],</span>
+                    <span class="n">version_modele</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">MODEL_NAME</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;DEBUG: log_entry créé: </span><span class="si">{</span><span class="n">log_entry</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># DEBUG</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">log_entry</span><span class="p">)</span>  <span class="c1"># db est la session ici</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG: db.add(log_entry) appelé&quot;</span><span class="p">)</span>  <span class="c1"># DEBUG</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">refresh</span><span class="p">(</span><span class="n">log_entry</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Prédiction pour </span><span class="si">{</span><span class="n">temp_index_for_df</span><span class="si">}</span><span class="s2"> enregistrée en BDD (log_id: </span><span class="si">{</span><span class="n">log_entry</span><span class="o">.</span><span class="n">log_id</span><span class="si">}</span><span class="s2">).&quot;</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">db_error</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Erreur lors de l&#39;enregistrement du log de prédiction en BDD: </span><span class="si">{</span><span class="n">db_error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+                <span class="c1"># Pas de HTTPException ici pour ne pas faire échouer la réponse au client si seul le log échoue.</span>
+
+        <span class="k">return</span> <span class="n">single_prediction_result</span>
+
+    <span class="k">except</span> <span class="p">(</span>
+        <span class="n">HTTPException</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">http_exc</span><span class="p">:</span>  <span class="c1"># Important de repropager les HTTPException pour que FastAPI les gère</span>
+        <span class="k">raise</span> <span class="n">http_exc</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># Capture les autres exceptions non prévues</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Erreur inattendue dans l&#39;endpoint /predict : </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_500_INTERNAL_SERVER_ERROR</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Une erreur interne s&#39;est produite lors du traitement de votre requête.&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
+    <span class="s2">&quot;/predict_bulk&quot;</span><span class="p">,</span>
+    <span class="n">response_model</span><span class="o">=</span><span class="n">BulkPredictionOutput</span><span class="p">,</span>
+    <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Predictions&quot;</span><span class="p">],</span>
+    <span class="n">summary</span><span class="o">=</span><span class="s2">&quot;Prédire l&#39;attrition pour plusieurs employés&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<div class="viewcode-block" id="predict_bulk">
+<a class="viewcode-back" href="../../autoapi/api/main/index.html#api.main.predict_bulk">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">predict_bulk</span><span class="p">(</span>
+    <span class="n">input_data</span><span class="p">:</span> <span class="n">BulkPredictionInput</span><span class="p">,</span>  <span class="c1"># Données d&#39;entrée validées (liste d&#39;employés)</span>
+    <span class="n">db</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_db</span><span class="p">),</span>  <span class="c1"># Injection de la session BDD</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prédit le risque d&#39;attrition pour une liste d&#39;employés.</span>
+
+<span class="sd">    Les données des employés sont fournies dans le corps de la requête au format JSON,</span>
+<span class="sd">    sous une clé &quot;employees&quot; contenant une liste d&#39;objets employé.</span>
+<span class="sd">    Retourne une liste de prédictions.</span>
+<span class="sd">    Les inputs et outputs de chaque prédiction sont enregistrés en base de données.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">load_prediction_pipeline</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s2">&quot;Tentative d&#39;appel à /predict_bulk alors que la pipeline n&#39;est pas chargée.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_503_SERVICE_UNAVAILABLE</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Modèle de prédiction non disponible. Veuillez réessayer plus tard.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="ow">not</span> <span class="n">input_data</span><span class="o">.</span><span class="n">employees</span>
+    <span class="p">):</span>  <span class="c1"># input_data est BulkPredictionInput, input_data.employees est la liste</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Requête /predict_bulk reçue avec une liste d&#39;employés vide.&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_400_BAD_REQUEST</span><span class="p">,</span>  <span class="c1"># Erreur client</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;La liste d&#39;employés (&#39;employees&#39;) ne peut pas être vide.&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">original_inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">emp</span><span class="o">.</span><span class="n">model_dump</span><span class="p">()</span> <span class="k">for</span> <span class="n">emp</span> <span class="ow">in</span> <span class="n">input_data</span><span class="o">.</span><span class="n">employees</span><span class="p">]</span>
+
+        <span class="c1"># Création d&#39;index temporaires pour le DataFrame, utiles pour le retour de predict_attrition</span>
+        <span class="n">df_indices</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;BULK_REQ_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">original_inputs</span><span class="p">))]</span>
+        <span class="n">df_for_prediction</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">original_inputs</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df_indices</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Requête /predict_bulk reçue pour </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df_for_prediction</span><span class="p">)</span><span class="si">}</span><span class="s2"> employés.&quot;</span>
+        <span class="p">)</span>
+
+        <span class="n">prediction_results_list</span> <span class="o">=</span> <span class="n">predict_attrition</span><span class="p">(</span><span class="n">df_for_prediction</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">prediction_results_list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="s2">&quot;error&quot;</span> <span class="ow">in</span> <span class="n">prediction_results_list</span>
+        <span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Erreur retournée par predict_attrition pour une requête en masse: </span><span class="si">{</span><span class="n">prediction_results_list</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_500_INTERNAL_SERVER_ERROR</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="n">prediction_results_list</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">prediction_results_list</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">prediction_results_list</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="n">original_inputs</span>
+        <span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;predict_attrition n&#39;a pas retourné le bon nombre de résultats pour une requête en masse.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+                <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_500_INTERNAL_SERVER_ERROR</span><span class="p">,</span>
+                <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;La prédiction en masse a échoué ou un nombre incorrect de résultats a été retourné.&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Enregistrement en base de données</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">ENABLE_API_DB_LOGGING</span><span class="p">:</span>
+            <span class="n">log_entries_to_add</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">original_input_dict</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">original_inputs</span><span class="p">):</span>
+                    <span class="n">current_prediction_result</span> <span class="o">=</span> <span class="n">prediction_results_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="n">log_entry</span> <span class="o">=</span> <span class="n">ApiPredictionLog</span><span class="p">(</span>
+                        <span class="n">employee_id_concerne</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span>
+                            <span class="n">current_prediction_result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id_employe&quot;</span><span class="p">,</span> <span class="n">df_indices</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                        <span class="p">),</span>
+                        <span class="n">input_data</span><span class="o">=</span><span class="n">original_input_dict</span><span class="p">,</span>
+                        <span class="n">prediction_probabilite</span><span class="o">=</span><span class="n">current_prediction_result</span><span class="p">[</span>
+                            <span class="s2">&quot;probabilite_depart&quot;</span>
+                        <span class="p">],</span>
+                        <span class="n">prediction_classe</span><span class="o">=</span><span class="n">current_prediction_result</span><span class="p">[</span>
+                            <span class="s2">&quot;prediction_depart&quot;</span>
+                        <span class="p">],</span>
+                        <span class="n">version_modele</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">MODEL_NAME</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">log_entries_to_add</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">log_entry</span><span class="p">)</span>
+
+                <span class="n">db</span><span class="o">.</span><span class="n">add_all</span><span class="p">(</span>
+                    <span class="n">log_entries_to_add</span>
+                <span class="p">)</span>  <span class="c1"># Plus efficace pour les insertions multiples</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">original_inputs</span><span class="p">)</span><span class="si">}</span><span class="s2"> prédictions en masse enregistrées en BDD.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">db_error</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Erreur lors de l&#39;enregistrement des logs de prédiction en masse en BDD: </span><span class="si">{</span><span class="n">db_error</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;predictions&quot;</span><span class="p">:</span> <span class="n">prediction_results_list</span><span class="p">}</span>
+
+    <span class="k">except</span> <span class="n">HTTPException</span> <span class="k">as</span> <span class="n">http_exc</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">http_exc</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Erreur inattendue dans l&#39;endpoint /predict_bulk : </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_500_INTERNAL_SERVER_ERROR</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s2">&quot;Une erreur interne s&#39;est produite lors du traitement de votre requête en masse.&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Cyrille ELIE.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

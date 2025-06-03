@@ -1,0 +1,217 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guide d’Installation &mdash; Documentation Attrition RH API v0.2.1</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=44cc1bf8"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=e6b791cb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Recherche" href="search.html" />
+    <link rel="next" title="Documentation Technique du Modèle de Prédiction d’Attrition RH" href="model_documentation.html" />
+    <link rel="prev" title="Bienvenue dans la documentation du Projet d’Attrition RH !" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Attrition RH API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenu:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Guide d’Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prerequis">Prérequis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#etapes-d-installation">Étapes d’Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#activation-de-l-environnement">Activation de l’Environnement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lancer-l-api-localement">Lancer l’API Localement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#lancer-les-tests">Lancer les Tests</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="model_documentation.html">Documentation Technique du Modèle de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_usage_examples.html">Exemples d’Utilisation de l’API de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Guide de Contribution au Projet d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Attrition RH API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Guide d’Installation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/installation_guide.rst.txt" rel="nofollow"> Afficher la source de la page</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="guide-d-installation">
+<span id="installation-guide"></span><h1>Guide d’Installation<a class="headerlink" href="#guide-d-installation" title="Lien vers cette rubrique"></a></h1>
+<p>Ce guide détaille les étapes nécessaires pour configurer l’environnement de développement local et lancer le projet de prédiction d’attrition RH.</p>
+<section id="prerequis">
+<h2>Prérequis<a class="headerlink" href="#prerequis" title="Lien vers cette rubrique"></a></h2>
+<p>Avant de commencer, assurez-vous d’avoir les outils suivants installés sur votre système :</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://git-scm.com/">Git</a></p></li>
+<li><p><a class="reference external" href="https://www.python.org/">Python 3.12+</a></p></li>
+<li><p><a class="reference external" href="https://python-poetry.org/docs/#installation">Poetry</a> (pour la gestion des dépendances Python)</p></li>
+<li><p><a class="reference external" href="https://www.docker.com/products/docker-desktop/">Docker Desktop</a> (ou Docker Engine + Docker Compose sur Linux) pour la base de données PostgreSQL.</p></li>
+</ul>
+</section>
+<section id="etapes-d-installation">
+<h2>Étapes d’Installation<a class="headerlink" href="#etapes-d-installation" title="Lien vers cette rubrique"></a></h2>
+<ol class="arabic">
+<li><p><strong>Cloner le Dépôt :</strong>
+Ouvrez un terminal et clonez le dépôt GitHub du projet :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span><span class="o">[</span>URL_DE_VOTRE_REPO_GITHUB<span class="o">]</span>
+<span class="nb">cd</span><span class="w"> </span>nom-du-dossier-projet
+</pre></div>
+</div>
+<p>Remplacez <cite>[URL_DE_VOTRE_REPO_GITHUB]</cite> par l’URL actuelle de votre dépôt et <cite>nom-du-dossier-projet</cite> par le nom du dossier créé.</p>
+</li>
+<li><p><strong>Installer les Dépendances Python :</strong>
+À la racine du projet cloné, utilisez Poetry pour installer les dépendances :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>install
+</pre></div>
+</div>
+<p>Cette commande créera un environnement virtuel dédié et installera tous les packages listés dans <cite>pyproject.toml</cite>.</p>
+</li>
+<li><p><strong>Configurer les Variables d’Environnement pour la Base de Données :</strong>
+Le projet utilise un fichier <cite>.env</cite> pour gérer les identifiants de la base de données locale.</p>
+<ul>
+<li><p>Copiez le fichier d’exemple <cite>.env.example</cite> (situé à la racine du projet) en un nouveau fichier nommé <cite>.env</cite> :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>.env.example<span class="w"> </span>.env
+</pre></div>
+</div>
+</li>
+<li><p>Ouvrez le fichier <cite>.env</cite> et remplacez les placeholders par vos identifiants PostgreSQL locaux. Par exemple :</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span># .env - Vos secrets locaux
+POSTGRES_USER=mon_user_local
+POSTGRES_PASSWORD=mon_mot_de_passe_secret
+POSTGRES_DB=attrition_dev_db
+DB_HOST_PORT=5432
+</pre></div>
+</div>
+</li>
+</ul>
+<p><strong>Note :</strong> Le fichier <cite>.env</cite> est listé dans <cite>.gitignore</cite> et ne doit pas être commité.</p>
+</li>
+<li><p><strong>Démarrer le Service PostgreSQL :</strong>
+Assurez-vous que Docker Desktop est en cours d’exécution. Puis, depuis la racine du projet, lancez le service PostgreSQL défini dans <cite>docker-compose.yml</cite> :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose<span class="w"> </span>up<span class="w"> </span>-d
+</pre></div>
+</div>
+<p>Pour vérifier que le conteneur est bien lancé : <cite>docker ps</cite>.
+Pour arrêter le service : <cite>docker-compose down</cite>.</p>
+</li>
+<li><p><strong>Initialiser la Base de Données (Créer les Tables) :</strong>
+Une fois le service PostgreSQL démarré, activez l’environnement Poetry (si ce n’est pas déjà fait) et lancez le script d’initialisation :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>shell<span class="w">  </span><span class="c1"># Si vous n&#39;êtes pas déjà dans le shell Poetry</span>
+python<span class="w"> </span>-m<span class="w"> </span>src.database.init_db
+</pre></div>
+</div>
+</li>
+<li><p><strong>Peupler la Table `employees` (Données Initiales) :</strong>
+Ce script charge les données des CSV sources, les nettoie et les insère dans la table <cite>employees</cite>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>scripts.populate_employees_table
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="activation-de-l-environnement">
+<h2>Activation de l’Environnement<a class="headerlink" href="#activation-de-l-environnement" title="Lien vers cette rubrique"></a></h2>
+<p>Pour travailler sur le projet, activez l’environnement virtuel créé par Poetry :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>shell
+</pre></div>
+</div>
+<p>Votre terminal est maintenant configuré pour utiliser l’interpréteur Python et les librairies de cet environnement.</p>
+</section>
+<section id="lancer-l-api-localement">
+<h2>Lancer l’API Localement<a class="headerlink" href="#lancer-l-api-localement" title="Lien vers cette rubrique"></a></h2>
+<p>Une fois l’environnement configuré et la base de données initialisée et peuplée :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>uvicorn<span class="w"> </span>src.api.main:app<span class="w"> </span>--reload
+</pre></div>
+</div>
+<p>L’API sera accessible sur <cite>http://127.0.0.1:8000</cite> et la documentation interactive sur <cite>http://127.0.0.1:8000/docs</cite>.</p>
+</section>
+<section id="lancer-les-tests">
+<h2>Lancer les Tests<a class="headerlink" href="#lancer-les-tests" title="Lien vers cette rubrique"></a></h2>
+<p>Pour exécuter la suite de tests :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>run<span class="w"> </span>pytest
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
+        <a href="index.html" class="btn btn-neutral float-left" title="Bienvenue dans la documentation du Projet d’Attrition RH !" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Précédent</a>
+        <a href="model_documentation.html" class="btn btn-neutral float-right" title="Documentation Technique du Modèle de Prédiction d’Attrition RH" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Cyrille ELIE.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>modeling.predict &mdash; Documentation Attrition RH API v0.2.1</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=44cc1bf8"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Attrition RH API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenu:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation_guide.html">Guide d’Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model_documentation.html">Documentation Technique du Modèle de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_usage_examples.html">Exemples d’Utilisation de l’API de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Guide de Contribution au Projet d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Attrition RH API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">modeling.predict</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de modeling.predict</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module pour charger la pipeline de Machine Learning entraînée et effectuer des prédictions.</span>
+
+<span class="sd">Fonctions principales :</span>
+
+<span class="sd">* `load_prediction_pipeline()`: Charge la pipeline Scikit-learn sauvegardée (modèle + préprocesseur).</span>
+<span class="sd">* `predict_attrition()`: Prend des données brutes d&#39;employés en entrée (DataFrame), applique les transformations de preprocessing initiales, puis utilise la pipeline chargée pour prédire la probabilité d&#39;attrition et la classe de départ.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">load</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span>  <span class="c1"># Ajout de Any</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">src</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>  <span class="c1"># Pour MODEL_PATH et BINARY_FEATURES_MAPPING</span>
+
+<span class="c1"># Importer les fonctions de preprocessing nécessaires</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.data_processing.preprocess</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">clean_data</span><span class="p">,</span>
+    <span class="n">map_binary_features</span><span class="p">,</span>
+    <span class="n">create_features</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Configuration du logging pour ce module</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(name)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<div class="viewcode-block" id="logger">
+<a class="viewcode-back" href="../../autoapi/modeling/predict/index.html#modeling.predict.logger">[docs]</a>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+<span class="c1"># Variable globale pour stocker la pipeline chargée et éviter de la recharger à chaque appel</span>
+<span class="n">_pipeline</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="kc">None</span>  <span class="c1"># Utilisation de Any car le type exact de la pipeline peut être complexe</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="load_prediction_pipeline">
+<a class="viewcode-back" href="../../autoapi/modeling/predict/index.html#modeling.predict.load_prediction_pipeline">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_prediction_pipeline</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Any</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Charge la pipeline de prédiction complète (préprocesseur + modèle) depuis le disque.</span>
+
+<span class="sd">    La pipeline est chargée une seule fois et stockée dans une variable globale `_pipeline`</span>
+<span class="sd">    pour optimiser les appels suivants.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Pipeline | None: L&#39;objet pipeline Scikit-learn chargé, ou None si une erreur</span>
+<span class="sd">                         se produit (ex: fichier non trouvé, erreur de chargement).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">_pipeline</span>
+    <span class="k">if</span> <span class="n">_pipeline</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Charger seulement si pas déjà en mémoire</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">MODEL_PATH</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Fichier pipeline non trouvé à l&#39;emplacement configuré : </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">MODEL_PATH</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Chargement de la pipeline de prédiction depuis : </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">MODEL_PATH</span><span class="si">}</span><span class="s2">...&quot;</span>
+            <span class="p">)</span>
+            <span class="n">_pipeline</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">MODEL_PATH</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Pipeline de prédiction chargée avec succès.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Erreur critique lors du chargement de la pipeline : </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">_pipeline</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># S&#39;assurer que _pipeline est None en cas d&#39;échec</span>
+            <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">_pipeline</span></div>
+
+
+
+<div class="viewcode-block" id="predict_attrition">
+<a class="viewcode-back" href="../../autoapi/modeling/predict/index.html#modeling.predict.predict_attrition">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">predict_attrition</span><span class="p">(</span>
+    <span class="n">input_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Prédit le risque d&#39;attrition pour les employés fournis en entrée.</span>
+
+<span class="sd">    Cette fonction prend un DataFrame de données brutes, applique les étapes</span>
+<span class="sd">    de preprocessing initiales (nettoyage, mappage binaire, création de features)</span>
+<span class="sd">    puis utilise la pipeline Scikit-learn entraînée et chargée pour effectuer</span>
+<span class="sd">    les prédictions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        input_data (pd.DataFrame): DataFrame contenant les données brutes des employés</span>
+<span class="sd">                                   pour lesquels faire une prédiction. Les colonnes doivent</span>
+<span class="sd">                                   correspondre aux attentes de `clean_data` et</span>
+<span class="sd">                                   `map_binary_features` (format brut).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[List[Dict[str, Any]], Dict[str, str]]:</span>
+<span class="sd">            - Une liste de dictionnaires si la prédiction réussit, chaque dictionnaire</span>
+<span class="sd">              contenant &#39;id_employe&#39;, &#39;probabilite_depart&#39;, &#39;prediction_depart&#39;.</span>
+<span class="sd">            - Un dictionnaire d&#39;erreur `{&quot;error&quot;: &quot;message&quot;}` si la pipeline n&#39;est pas</span>
+<span class="sd">              chargée ou si une autre erreur majeure se produit.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">load_prediction_pipeline</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">pipeline</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Le logger dans load_prediction_pipeline aura déjà enregistré l&#39;erreur spécifique.</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Pipeline de prédiction non chargée. Le modèle n&#39;a peut-être pas été entraîné ou le fichier est manquant.&quot;</span>
+        <span class="p">}</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Début de la prédiction pour </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">input_data</span><span class="p">)</span><span class="si">}</span><span class="s2"> enregistrement(s)...&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Travailler sur une copie pour éviter de modifier le DataFrame original</span>
+        <span class="n">data_to_process</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># --- ÉTAPE 1 : Appliquer les transformations manuelles ---</span>
+        <span class="c1"># clean_data s&#39;attend à la colonne &#39;a_quitte_l_entreprise&#39; pour créer config.TARGET_VARIABLE.</span>
+        <span class="c1"># Pour la prédiction, cette colonne n&#39;existe pas dans les données d&#39;entrée.</span>
+        <span class="c1"># Nous ajoutons une colonne factice &#39;a_quitte_l_entreprise&#39; pour que clean_data</span>
+        <span class="c1"># puisse s&#39;exécuter sans erreur. Cette colonne sera ensuite supprimée.</span>
+        <span class="k">if</span> <span class="s2">&quot;a_quitte_l_entreprise&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_to_process</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">data_to_process</span><span class="p">[</span><span class="s2">&quot;a_quitte_l_entreprise&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot;Non&quot;</span>  <span class="c1"># Valeur factice, n&#39;influence pas les features</span>
+            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s2">&quot;Colonne &#39;a_quitte_l_entreprise&#39; factice ajoutée pour le preprocessing.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">df_cleaned</span> <span class="o">=</span> <span class="n">clean_data</span><span class="p">(</span><span class="n">data_to_process</span><span class="p">)</span>
+        <span class="c1"># Utiliser le mapping centralisé depuis config.py</span>
+        <span class="n">df_mapped</span> <span class="o">=</span> <span class="n">map_binary_features</span><span class="p">(</span><span class="n">df_cleaned</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">BINARY_FEATURES_MAPPING</span><span class="p">)</span>
+        <span class="n">df_featured</span> <span class="o">=</span> <span class="n">create_features</span><span class="p">(</span><span class="n">df_mapped</span><span class="p">)</span>
+
+        <span class="c1"># Préparer X_predict : supprimer la variable cible (même factice) et toute autre</span>
+        <span class="c1"># En se basant sur train_model.py, X_predict ne doit pas contenir TARGET_VARIABLE.</span>
+        <span class="c1"># Les autres colonnes non-features (comme id_employee) ont été retirées AVANT</span>
+        <span class="c1"># la définition des listes de colonnes pour build_preprocessor, donc le preprocessor ne les attend pas.</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">TARGET_VARIABLE</span> <span class="ow">in</span> <span class="n">df_featured</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">X_predict</span> <span class="o">=</span> <span class="n">df_featured</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">TARGET_VARIABLE</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">X_predict</span> <span class="o">=</span> <span class="n">df_featured</span>  <span class="c1"># Si TARGET_VARIABLE n&#39;a pas été créé (ex: clean_data modifié)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Transformations manuelles appliquées. Shape de X_predict: </span><span class="si">{</span><span class="n">X_predict</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="c1"># logger.debug(f&quot;Colonnes de X_predict avant la pipeline : {X_predict.columns.tolist()}&quot;)</span>
+
+        <span class="c1"># --- ÉTAPE 2 : Utiliser la pipeline complète pour prédire ---</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Application de la pipeline Scikit-learn pour la prédiction...&quot;</span><span class="p">)</span>
+        <span class="n">probabilities</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_predict</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_predict</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Calcul des probabilités et des classes terminé.&quot;</span><span class="p">)</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">index_val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="n">X_predict</span><span class="o">.</span><span class="n">index</span>
+        <span class="p">):</span>  <span class="c1"># Renommé index en index_val pour éviter conflit</span>
+            <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;id_employe&quot;</span><span class="p">:</span> <span class="n">index_val</span><span class="p">,</span>  <span class="c1"># Utilise l&#39;index du DataFrame d&#39;entrée</span>
+                    <span class="s2">&quot;probabilite_depart&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">probabilities</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+                    <span class="s2">&quot;prediction_depart&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">predictions</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Prédictions formatées avec succès.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">results</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Erreur critique lors du processus de prédiction : </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Erreur de prédiction : </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span></div>
+
+
+
+<span class="c1"># Pour tester ce module : poetry run python -m src.modeling.predict</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;--- Test direct du module predict.py ---&quot;</span><span class="p">)</span>
+    <span class="c1"># Exemple de données brutes (doit correspondre au schéma EmployeeInput de l&#39;API)</span>
+<div class="viewcode-block" id="sample_data_dict">
+<a class="viewcode-back" href="../../autoapi/modeling/predict/index.html#modeling.predict.sample_data_dict">[docs]</a>
+    <span class="n">sample_data_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="c1"># Assurez-vous que toutes les clés correspondent à EmployeeInput et aux attentes de clean_data</span>
+        <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">45</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span>
+        <span class="s2">&quot;genre&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;M&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">],</span>  <span class="c1"># Utiliser les valeurs textuelles brutes</span>
+        <span class="s2">&quot;revenu_mensuel&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">4850</span><span class="p">,</span> <span class="mi">6000</span><span class="p">],</span>
+        <span class="s2">&quot;statut_marital&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Célibataire&quot;</span><span class="p">,</span> <span class="s2">&quot;Marié(e)&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;departement&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Commercial&quot;</span><span class="p">,</span> <span class="s2">&quot;R&amp;D&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;poste&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Cadre Commercial&quot;</span><span class="p">,</span> <span class="s2">&quot;Ingenieur&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;nombre_experiences_precedentes&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="s2">&quot;annees_dans_l_entreprise&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="s2">&quot;satisfaction_employee_environnement&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span>
+        <span class="s2">&quot;note_evaluation_precedente&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="s2">&quot;satisfaction_employee_nature_travail&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="s2">&quot;satisfaction_employee_equipe&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="s2">&quot;satisfaction_employee_equilibre_pro_perso&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="s2">&quot;note_evaluation_actuelle&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="s2">&quot;heure_supplementaires&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Non&quot;</span><span class="p">,</span> <span class="s2">&quot;Oui&quot;</span><span class="p">],</span>  <span class="c1"># Valeurs textuelles brutes</span>
+        <span class="s2">&quot;augementation_salaire_precedente&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;15 %&quot;</span><span class="p">,</span> <span class="s2">&quot;10 %&quot;</span><span class="p">],</span>  <span class="c1"># Format texte brut</span>
+        <span class="s2">&quot;nombre_participation_pee&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="s2">&quot;nb_formations_suivies&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="s2">&quot;distance_domicile_travail&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="s2">&quot;niveau_education&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Bac+3&quot;</span><span class="p">,</span> <span class="s2">&quot;Bac+5&quot;</span><span class="p">],</span>  <span class="c1"># Exemple, adaptez à vos données</span>
+        <span class="s2">&quot;domaine_etude&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Infra &amp; Cloud&quot;</span><span class="p">,</span> <span class="s2">&quot;Developpement&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;frequence_deplacement&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Occasionnel&quot;</span><span class="p">,</span> <span class="s2">&quot;Frequent&quot;</span><span class="p">],</span>  <span class="c1"># Exemple, adaptez</span>
+        <span class="s2">&quot;annees_depuis_la_derniere_promotion&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="c1"># Pas besoin de &#39;a_quitte_l_entreprise&#39; ici, la fonction predict_attrition l&#39;ajoute temporairement</span>
+    <span class="p">}</span></div>
+
+    <span class="n">sample_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">sample_data_dict</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;EMP_TEST_A&quot;</span><span class="p">,</span> <span class="s2">&quot;EMP_TEST_B&quot;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">MODEL_PATH</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Modèle trouvé, lancement de la prédiction test...&quot;</span><span class="p">)</span>
+        <span class="n">predictions_output</span> <span class="o">=</span> <span class="n">predict_attrition</span><span class="p">(</span><span class="n">sample_df</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">--- Résultat de la Prédiction Test ---&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">predictions_output</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;error&quot;</span> <span class="ow">in</span> <span class="n">predictions_output</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Erreur: </span><span class="si">{</span><span class="n">predictions_output</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">predictions_output</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Modèle non trouvé à </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">MODEL_PATH</span><span class="si">}</span><span class="s2">. Veuillez l&#39;entraîner d&#39;abord avec train_model.py.&quot;</span>
+        <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;--- Fin du test direct du module predict.py ---&quot;</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Cyrille ELIE.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

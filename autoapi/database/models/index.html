@@ -1,0 +1,341 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>database.models &mdash; Documentation Attrition RH API v0.2.1</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=44cc1bf8"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" />
+    <link rel="next" title="modeling" href="../../modeling/index.html" />
+    <link rel="prev" title="database.init_db" href="../init_db/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Attrition RH API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenu:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation_guide.html">Guide d’Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_documentation.html">Documentation Technique du Modèle de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_usage_examples.html">Exemples d’Utilisation de l’API de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Guide de Contribution au Projet d’Attrition RH</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../api/index.html">api</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../config/index.html">config</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">database</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../database_setup/index.html">database.database_setup</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../init_db/index.html">database.init_db</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">database.models</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../modeling/index.html">modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../data_processing/index.html">data_processing</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Attrition RH API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">database</a></li>
+      <li class="breadcrumb-item active">database.models</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/database/models/index.rst.txt" rel="nofollow"> Afficher la source de la page</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-database.models">
+<span id="database-models"></span><h1>database.models<a class="headerlink" href="#module-database.models" title="Lien vers cette rubrique"></a></h1>
+<p>Définition des modèles SQLAlchemy ORM pour les tables de la base de données.</p>
+<p>Ce module contient les classes Python qui mappent aux tables de la base de données PostgreSQL, en utilisant la Base déclarative de SQLAlchemy.
+Chaque classe représente une table, et ses attributs de classe représentent les colonnes de cette table.</p>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Lien vers cette rubrique"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#database.models.Employee" title="database.models.Employee"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Employee</span></code></a></p></td>
+<td><p>Modèle SQLAlchemy représentant un employé et ses caractéristiques.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#database.models.ApiPredictionLog" title="database.models.ApiPredictionLog"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ApiPredictionLog</span></code></a></p></td>
+<td><p>Modèle SQLAlchemy pour enregistrer les appels à l'API de prédiction.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Lien vers cette rubrique"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.Employee">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">Employee</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../database_setup/index.html#database.database_setup.Base" title="database.database_setup.Base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">database.database_setup.Base</span></code></a></p>
+<p>Modèle SQLAlchemy représentant un employé et ses caractéristiques.
+Mappe à la table “employees” dans la base de données.
+Cette table contient les données fusionnées et prétraitées utilisées
+pour l’entraînement du modèle d’attrition et potentiellement pour
+enrichir les informations lors des prédictions.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.id_employee">
+<span class="sig-name descname"><span class="pre">id_employee</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.id_employee"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.id_employee" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.age">
+<span class="sig-name descname"><span class="pre">age</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.age"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.age" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.genre">
+<span class="sig-name descname"><span class="pre">genre</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.genre"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.genre" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.revenu_mensuel">
+<span class="sig-name descname"><span class="pre">revenu_mensuel</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.revenu_mensuel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.revenu_mensuel" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.statut_marital">
+<span class="sig-name descname"><span class="pre">statut_marital</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.statut_marital"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.statut_marital" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.departement">
+<span class="sig-name descname"><span class="pre">departement</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.departement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.departement" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.poste">
+<span class="sig-name descname"><span class="pre">poste</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.poste"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.poste" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.nombre_experiences_precedentes">
+<span class="sig-name descname"><span class="pre">nombre_experiences_precedentes</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.nombre_experiences_precedentes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.nombre_experiences_precedentes" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.annees_dans_l_entreprise">
+<span class="sig-name descname"><span class="pre">annees_dans_l_entreprise</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.annees_dans_l_entreprise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.annees_dans_l_entreprise" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.satisfaction_employee_environnement">
+<span class="sig-name descname"><span class="pre">satisfaction_employee_environnement</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.satisfaction_employee_environnement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.satisfaction_employee_environnement" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.note_evaluation_precedente">
+<span class="sig-name descname"><span class="pre">note_evaluation_precedente</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.note_evaluation_precedente"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.note_evaluation_precedente" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.satisfaction_employee_nature_travail">
+<span class="sig-name descname"><span class="pre">satisfaction_employee_nature_travail</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.satisfaction_employee_nature_travail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.satisfaction_employee_nature_travail" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.satisfaction_employee_equipe">
+<span class="sig-name descname"><span class="pre">satisfaction_employee_equipe</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.satisfaction_employee_equipe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.satisfaction_employee_equipe" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.satisfaction_employee_equilibre_pro_perso">
+<span class="sig-name descname"><span class="pre">satisfaction_employee_equilibre_pro_perso</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.satisfaction_employee_equilibre_pro_perso"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.satisfaction_employee_equilibre_pro_perso" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.note_evaluation_actuelle">
+<span class="sig-name descname"><span class="pre">note_evaluation_actuelle</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.note_evaluation_actuelle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.note_evaluation_actuelle" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.heure_supplementaires">
+<span class="sig-name descname"><span class="pre">heure_supplementaires</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.heure_supplementaires"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.heure_supplementaires" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.augementation_salaire_precedente">
+<span class="sig-name descname"><span class="pre">augementation_salaire_precedente</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.augementation_salaire_precedente"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.augementation_salaire_precedente" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.nombre_participation_pee">
+<span class="sig-name descname"><span class="pre">nombre_participation_pee</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.nombre_participation_pee"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.nombre_participation_pee" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.nb_formations_suivies">
+<span class="sig-name descname"><span class="pre">nb_formations_suivies</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.nb_formations_suivies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.nb_formations_suivies" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.distance_domicile_travail">
+<span class="sig-name descname"><span class="pre">distance_domicile_travail</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.distance_domicile_travail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.distance_domicile_travail" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.niveau_education">
+<span class="sig-name descname"><span class="pre">niveau_education</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.niveau_education"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.niveau_education" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.domaine_etude">
+<span class="sig-name descname"><span class="pre">domaine_etude</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.domaine_etude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.domaine_etude" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.frequence_deplacement">
+<span class="sig-name descname"><span class="pre">frequence_deplacement</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.frequence_deplacement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.frequence_deplacement" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.annees_depuis_la_derniere_promotion">
+<span class="sig-name descname"><span class="pre">annees_depuis_la_derniere_promotion</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.annees_depuis_la_derniere_promotion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.annees_depuis_la_derniere_promotion" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.a_quitte_l_entreprise_numeric">
+<span class="sig-name descname"><span class="pre">a_quitte_l_entreprise_numeric</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.a_quitte_l_entreprise_numeric"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.a_quitte_l_entreprise_numeric" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.date_creation_enregistrement">
+<span class="sig-name descname"><span class="pre">date_creation_enregistrement</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.date_creation_enregistrement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.date_creation_enregistrement" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.Employee.date_derniere_modification">
+<span class="sig-name descname"><span class="pre">date_derniere_modification</span></span><a class="reference internal" href="../../../_modules/database/models.html#Employee.date_derniere_modification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.Employee.date_derniere_modification" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="database.models.ApiPredictionLog">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">database.models.</span></span><span class="sig-name descname"><span class="pre">ApiPredictionLog</span></span><a class="reference internal" href="../../../_modules/database/models.html#ApiPredictionLog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.ApiPredictionLog" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../database_setup/index.html#database.database_setup.Base" title="database.database_setup.Base"><code class="xref py py-obj docutils literal notranslate"><span class="pre">database.database_setup.Base</span></code></a></p>
+<p>Modèle SQLAlchemy pour enregistrer les appels à l’API de prédiction.
+Mappe à la table “api_prediction_logs”. Chaque enregistrement correspond
+à une requête de prédiction, incluant les données d’entrée et le résultat.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.ApiPredictionLog.log_id">
+<span class="sig-name descname"><span class="pre">log_id</span></span><a class="reference internal" href="../../../_modules/database/models.html#ApiPredictionLog.log_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.ApiPredictionLog.log_id" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.ApiPredictionLog.timestamp_requete">
+<span class="sig-name descname"><span class="pre">timestamp_requete</span></span><a class="reference internal" href="../../../_modules/database/models.html#ApiPredictionLog.timestamp_requete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.ApiPredictionLog.timestamp_requete" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.ApiPredictionLog.employee_id_concerne">
+<span class="sig-name descname"><span class="pre">employee_id_concerne</span></span><a class="reference internal" href="../../../_modules/database/models.html#ApiPredictionLog.employee_id_concerne"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.ApiPredictionLog.employee_id_concerne" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.ApiPredictionLog.input_data">
+<span class="sig-name descname"><span class="pre">input_data</span></span><a class="reference internal" href="../../../_modules/database/models.html#ApiPredictionLog.input_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.ApiPredictionLog.input_data" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.ApiPredictionLog.prediction_probabilite">
+<span class="sig-name descname"><span class="pre">prediction_probabilite</span></span><a class="reference internal" href="../../../_modules/database/models.html#ApiPredictionLog.prediction_probabilite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.ApiPredictionLog.prediction_probabilite" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.ApiPredictionLog.prediction_classe">
+<span class="sig-name descname"><span class="pre">prediction_classe</span></span><a class="reference internal" href="../../../_modules/database/models.html#ApiPredictionLog.prediction_classe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.ApiPredictionLog.prediction_classe" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="database.models.ApiPredictionLog.version_modele">
+<span class="sig-name descname"><span class="pre">version_modele</span></span><a class="reference internal" href="../../../_modules/database/models.html#ApiPredictionLog.version_modele"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#database.models.ApiPredictionLog.version_modele" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
+        <a href="../init_db/index.html" class="btn btn-neutral float-left" title="database.init_db" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Précédent</a>
+        <a href="../../modeling/index.html" class="btn btn-neutral float-right" title="modeling" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Cyrille ELIE.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,346 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>config &mdash; Documentation Attrition RH API v0.2.1</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=44cc1bf8"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" />
+    <link rel="next" title="database" href="../database/index.html" />
+    <link rel="prev" title="api.schemas" href="../api/schemas/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Attrition RH API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenu:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../installation_guide.html">Guide d’Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model_documentation.html">Documentation Technique du Modèle de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_usage_examples.html">Exemples d’Utilisation de l’API de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Guide de Contribution au Projet d’Attrition RH</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api/index.html">api</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">config</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#attributes">Attributes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#config.BASE_DIR"><code class="docutils literal notranslate"><span class="pre">BASE_DIR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.DATA_DIR"><code class="docutils literal notranslate"><span class="pre">DATA_DIR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.MODELS_DIR"><code class="docutils literal notranslate"><span class="pre">MODELS_DIR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.NOTEBOOKS_DIR"><code class="docutils literal notranslate"><span class="pre">NOTEBOOKS_DIR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.RAW_SIRH_PATH"><code class="docutils literal notranslate"><span class="pre">RAW_SIRH_PATH</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.RAW_EVAL_PATH"><code class="docutils literal notranslate"><span class="pre">RAW_EVAL_PATH</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.RAW_SONDAGE_PATH"><code class="docutils literal notranslate"><span class="pre">RAW_SONDAGE_PATH</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.PROCESSED_DATA_PATH"><code class="docutils literal notranslate"><span class="pre">PROCESSED_DATA_PATH</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.MODEL_NAME"><code class="docutils literal notranslate"><span class="pre">MODEL_NAME</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.MODEL_PATH"><code class="docutils literal notranslate"><span class="pre">MODEL_PATH</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.TARGET_VARIABLE"><code class="docutils literal notranslate"><span class="pre">TARGET_VARIABLE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.DB_USER"><code class="docutils literal notranslate"><span class="pre">DB_USER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.DB_PASSWORD"><code class="docutils literal notranslate"><span class="pre">DB_PASSWORD</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.DB_HOST"><code class="docutils literal notranslate"><span class="pre">DB_HOST</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.DB_PORT"><code class="docutils literal notranslate"><span class="pre">DB_PORT</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.DB_NAME"><code class="docutils literal notranslate"><span class="pre">DB_NAME</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.DATABASE_URL"><code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.API_TITLE"><code class="docutils literal notranslate"><span class="pre">API_TITLE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.API_VERSION"><code class="docutils literal notranslate"><span class="pre">API_VERSION</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.ENABLE_API_DB_LOGGING"><code class="docutils literal notranslate"><span class="pre">ENABLE_API_DB_LOGGING</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.BINARY_FEATURES_MAPPING"><code class="docutils literal notranslate"><span class="pre">BINARY_FEATURES_MAPPING</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.ORDINAL_FEATURES_CATEGORIES"><code class="docutils literal notranslate"><span class="pre">ORDINAL_FEATURES_CATEGORIES</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#config.LIMITED_VALUES_FEATURES"><code class="docutils literal notranslate"><span class="pre">LIMITED_VALUES_FEATURES</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../database/index.html">database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../modeling/index.html">modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../data_processing/index.html">data_processing</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Attrition RH API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">API Reference</a></li>
+      <li class="breadcrumb-item active">config</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/autoapi/config/index.rst.txt" rel="nofollow"> Afficher la source de la page</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-config">
+<span id="config"></span><h1>config<a class="headerlink" href="#module-config" title="Lien vers cette rubrique"></a></h1>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Lien vers cette rubrique"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#config.BASE_DIR" title="config.BASE_DIR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BASE_DIR</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#config.DATA_DIR" title="config.DATA_DIR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DATA_DIR</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#config.MODELS_DIR" title="config.MODELS_DIR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MODELS_DIR</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#config.NOTEBOOKS_DIR" title="config.NOTEBOOKS_DIR"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NOTEBOOKS_DIR</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#config.RAW_SIRH_PATH" title="config.RAW_SIRH_PATH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RAW_SIRH_PATH</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#config.RAW_EVAL_PATH" title="config.RAW_EVAL_PATH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RAW_EVAL_PATH</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#config.RAW_SONDAGE_PATH" title="config.RAW_SONDAGE_PATH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RAW_SONDAGE_PATH</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#config.PROCESSED_DATA_PATH" title="config.PROCESSED_DATA_PATH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PROCESSED_DATA_PATH</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#config.MODEL_NAME" title="config.MODEL_NAME"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MODEL_NAME</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#config.MODEL_PATH" title="config.MODEL_PATH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MODEL_PATH</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#config.TARGET_VARIABLE" title="config.TARGET_VARIABLE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TARGET_VARIABLE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#config.DB_USER" title="config.DB_USER"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DB_USER</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#config.DB_PASSWORD" title="config.DB_PASSWORD"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DB_PASSWORD</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#config.DB_HOST" title="config.DB_HOST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DB_HOST</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#config.DB_PORT" title="config.DB_PORT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DB_PORT</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#config.DB_NAME" title="config.DB_NAME"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DB_NAME</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#config.DATABASE_URL" title="config.DATABASE_URL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DATABASE_URL</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#config.API_TITLE" title="config.API_TITLE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">API_TITLE</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#config.API_VERSION" title="config.API_VERSION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">API_VERSION</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#config.ENABLE_API_DB_LOGGING" title="config.ENABLE_API_DB_LOGGING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ENABLE_API_DB_LOGGING</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#config.BINARY_FEATURES_MAPPING" title="config.BINARY_FEATURES_MAPPING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BINARY_FEATURES_MAPPING</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#config.ORDINAL_FEATURES_CATEGORIES" title="config.ORDINAL_FEATURES_CATEGORIES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ORDINAL_FEATURES_CATEGORIES</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#config.LIMITED_VALUES_FEATURES" title="config.LIMITED_VALUES_FEATURES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LIMITED_VALUES_FEATURES</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Lien vers cette rubrique"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="config.BASE_DIR">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">BASE_DIR</span></span><a class="reference internal" href="../../_modules/config.html#BASE_DIR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.BASE_DIR" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.DATA_DIR">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">DATA_DIR</span></span><a class="reference internal" href="../../_modules/config.html#DATA_DIR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.DATA_DIR" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.MODELS_DIR">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">MODELS_DIR</span></span><a class="reference internal" href="../../_modules/config.html#MODELS_DIR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.MODELS_DIR" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.NOTEBOOKS_DIR">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">NOTEBOOKS_DIR</span></span><a class="reference internal" href="../../_modules/config.html#NOTEBOOKS_DIR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.NOTEBOOKS_DIR" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.RAW_SIRH_PATH">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">RAW_SIRH_PATH</span></span><a class="reference internal" href="../../_modules/config.html#RAW_SIRH_PATH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.RAW_SIRH_PATH" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.RAW_EVAL_PATH">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">RAW_EVAL_PATH</span></span><a class="reference internal" href="../../_modules/config.html#RAW_EVAL_PATH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.RAW_EVAL_PATH" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.RAW_SONDAGE_PATH">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">RAW_SONDAGE_PATH</span></span><a class="reference internal" href="../../_modules/config.html#RAW_SONDAGE_PATH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.RAW_SONDAGE_PATH" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.PROCESSED_DATA_PATH">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">PROCESSED_DATA_PATH</span></span><a class="reference internal" href="../../_modules/config.html#PROCESSED_DATA_PATH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.PROCESSED_DATA_PATH" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.MODEL_NAME">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">MODEL_NAME</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'attrition_logistic_regression.joblib'</span></em><a class="reference internal" href="../../_modules/config.html#MODEL_NAME"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.MODEL_NAME" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.MODEL_PATH">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">MODEL_PATH</span></span><a class="reference internal" href="../../_modules/config.html#MODEL_PATH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.MODEL_PATH" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.TARGET_VARIABLE">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">TARGET_VARIABLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'a_quitte_l_entreprise_numeric'</span></em><a class="reference internal" href="../../_modules/config.html#TARGET_VARIABLE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.TARGET_VARIABLE" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.DB_USER">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">DB_USER</span></span><a class="reference internal" href="../../_modules/config.html#DB_USER"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.DB_USER" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.DB_PASSWORD">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">DB_PASSWORD</span></span><a class="reference internal" href="../../_modules/config.html#DB_PASSWORD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.DB_PASSWORD" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.DB_HOST">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">DB_HOST</span></span><a class="reference internal" href="../../_modules/config.html#DB_HOST"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.DB_HOST" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.DB_PORT">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">DB_PORT</span></span><a class="reference internal" href="../../_modules/config.html#DB_PORT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.DB_PORT" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.DB_NAME">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">DB_NAME</span></span><a class="reference internal" href="../../_modules/config.html#DB_NAME"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.DB_NAME" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.DATABASE_URL">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">DATABASE_URL</span></span><a class="reference internal" href="../../_modules/config.html#DATABASE_URL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.DATABASE_URL" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.API_TITLE">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">API_TITLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&quot;API</span> <span class="pre">de</span> <span class="pre">Prédiction</span> <span class="pre">d'Attrition</span> <span class="pre">RH&quot;</span></em><a class="reference internal" href="../../_modules/config.html#API_TITLE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.API_TITLE" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.API_VERSION">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">API_VERSION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'0.1.0'</span></em><a class="reference internal" href="../../_modules/config.html#API_VERSION"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.API_VERSION" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.ENABLE_API_DB_LOGGING">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">ENABLE_API_DB_LOGGING</span></span><a class="reference internal" href="../../_modules/config.html#ENABLE_API_DB_LOGGING"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.ENABLE_API_DB_LOGGING" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.BINARY_FEATURES_MAPPING">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">BINARY_FEATURES_MAPPING</span></span><a class="reference internal" href="../../_modules/config.html#BINARY_FEATURES_MAPPING"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.BINARY_FEATURES_MAPPING" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.ORDINAL_FEATURES_CATEGORIES">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">ORDINAL_FEATURES_CATEGORIES</span></span><a class="reference internal" href="../../_modules/config.html#ORDINAL_FEATURES_CATEGORIES"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.ORDINAL_FEATURES_CATEGORIES" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="config.LIMITED_VALUES_FEATURES">
+<span class="sig-prename descclassname"><span class="pre">config.</span></span><span class="sig-name descname"><span class="pre">LIMITED_VALUES_FEATURES</span></span><a class="reference internal" href="../../_modules/config.html#LIMITED_VALUES_FEATURES"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#config.LIMITED_VALUES_FEATURES" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
+        <a href="../api/schemas/index.html" class="btn btn-neutral float-left" title="api.schemas" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Précédent</a>
+        <a href="../database/index.html" class="btn btn-neutral float-right" title="database" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Cyrille ELIE.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

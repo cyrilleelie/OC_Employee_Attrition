@@ -1,0 +1,557 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>api.schemas &mdash; Documentation Attrition RH API v0.2.1</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=44cc1bf8"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Attrition RH API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenu:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation_guide.html">Guide d’Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model_documentation.html">Documentation Technique du Modèle de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_usage_examples.html">Exemples d’Utilisation de l’API de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Guide de Contribution au Projet d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Attrition RH API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">api.schemas</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de api.schemas</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Définition des schémas Pydantic pour la validation des données de l&#39;API.</span>
+
+<span class="sd">Ce module contient les modèles de données utilisés par FastAPI pour :</span>
+
+<span class="sd">* Valider les données des requêtes entrantes.</span>
+<span class="sd">* Sérialiser les données des réponses sortantes.</span>
+<span class="sd">* Générer automatiquement la documentation OpenAPI (Swagger UI).</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span><span class="p">,</span> <span class="n">ConfigDict</span><span class="p">,</span> <span class="n">field_validator</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">src</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>  <span class="c1"># Importer votre module config</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DEBUG SCHEMAS: Chargement des configurations...&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Allowed genre keys from config: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">BINARY_FEATURES_MAPPING</span><span class="p">[</span><span class="s1">&#39;genre&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Allowed heure_supplementaires keys from config: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">BINARY_FEATURES_MAPPING</span><span class="p">[</span><span class="s1">&#39;heure_supplementaires&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Allowed frequence_deplacement values from config: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">ORDINAL_FEATURES_CATEGORIES</span><span class="p">[</span><span class="s1">&#39;frequence_deplacement&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Allowed statut_marital values from config: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">LIMITED_VALUES_FEATURES</span><span class="p">[</span><span class="s1">&#39;statut_marital&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Allowed departement values from config: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">LIMITED_VALUES_FEATURES</span><span class="p">[</span><span class="s1">&#39;departement&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Allowed poste values from config: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">LIMITED_VALUES_FEATURES</span><span class="p">[</span><span class="s1">&#39;poste&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s2">&quot;Allowed domaine_etude values from config: </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">LIMITED_VALUES_FEATURES</span><span class="p">[</span><span class="s1">&#39;domaine_etude&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
+
+
+<span class="c1"># IMPORTANT : Ce modèle doit contenir TOUTES les features</span>
+<span class="c1"># que votre modèle attend en entrée (AVANT preprocessing).</span>
+<span class="c1"># Utilisez les mêmes noms que dans vos fichiers CSV initiaux.</span>
+<span class="c1"># Ajoutez des descriptions et des exemples pour une meilleure documentation.</span>
+<div class="viewcode-block" id="EmployeeInput">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">EmployeeInput</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Schéma Pydantic représentant les données d&#39;entrée pour un employé</span>
+<span class="sd">    lors d&#39;une requête de prédiction d&#39;attrition.</span>
+
+<span class="sd">    Les champs correspondent aux données brutes attendues par la pipeline de preprocessing</span>
+<span class="sd">    avant toute transformation majeure (scaling, one-hot encoding, etc.).</span>
+<span class="sd">    Les descriptions et exemples aident à la compréhension et à l&#39;utilisation de l&#39;API.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EmployeeInput.age">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.age">[docs]</a>
+    <span class="n">age</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>  <span class="c1"># Le &quot;...&quot; indique que le champ est requis</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">41</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Âge de l&#39;employé en années.&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.genre">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.genre">[docs]</a>
+    <span class="n">genre</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="s2">&quot;F&quot;</span>
+        <span class="p">},</span>  <span class="c1"># Modifié pour correspondre à la description</span>
+        <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Genre de l&#39;employé. Valeurs attendues : </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">BINARY_FEATURES_MAPPING</span><span class="p">[</span><span class="s1">&#39;genre&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>  <span class="c1"># Préciser les valeurs attendues si possible</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.revenu_mensuel">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.revenu_mensuel">[docs]</a>
+    <span class="n">revenu_mensuel</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mf">5993.0</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Revenu mensuel brut de l&#39;employé.&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.statut_marital">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.statut_marital">[docs]</a>
+    <span class="n">statut_marital</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="s2">&quot;Célibataire&quot;</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Statut marital de l&#39;employé. Valeurs attendues : </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">LIMITED_VALUES_FEATURES</span><span class="p">[</span><span class="s1">&#39;statut_marital&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.departement">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.departement">[docs]</a>
+    <span class="n">departement</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="s2">&quot;Commercial&quot;</span>
+        <span class="p">},</span>  <span class="c1"># &#39;Ventes&#39; au lieu de &#39;Commercial&#39; pour un département</span>
+        <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Département de l&#39;entreprise où travaille l&#39;employé. Valeurs attendues : </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">LIMITED_VALUES_FEATURES</span><span class="p">[</span><span class="s1">&#39;departement&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.poste">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.poste">[docs]</a>
+    <span class="n">poste</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="s2">&quot;Cadre Commercial&quot;</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Intitulé du poste de l&#39;employé. Valeurs attendues : </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">LIMITED_VALUES_FEATURES</span><span class="p">[</span><span class="s1">&#39;poste&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.nombre_experiences_precedentes">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.nombre_experiences_precedentes">[docs]</a>
+    <span class="n">nombre_experiences_precedentes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">3</span>
+        <span class="p">},</span>  <span class="c1"># J&#39;ai mis 3 au lieu de 8 pour varier de l&#39;exemple global</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Nombre d&#39;emplois précédents de l&#39;employé avant l&#39;actuel.&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.annees_dans_l_entreprise">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.annees_dans_l_entreprise">[docs]</a>
+    <span class="n">annees_dans_l_entreprise</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Nombre total d&#39;années passées par l&#39;employé dans l&#39;entreprise actuelle.&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+    <span class="c1"># Pour les scores de satisfaction, préciser l&#39;échelle est une bonne idée.</span>
+<div class="viewcode-block" id="EmployeeInput.satisfaction_employee_environnement">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.satisfaction_employee_environnement">[docs]</a>
+    <span class="n">satisfaction_employee_environnement</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Score de satisfaction de l&#39;employé concernant l&#39;environnement de travail (généralement sur une échelle de 1 à 5).&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.satisfaction_employee_nature_travail">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.satisfaction_employee_nature_travail">[docs]</a>
+    <span class="n">satisfaction_employee_nature_travail</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Score de satisfaction de l&#39;employé concernant la nature de son travail (échelle 1-5).&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.satisfaction_employee_equipe">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.satisfaction_employee_equipe">[docs]</a>
+    <span class="n">satisfaction_employee_equipe</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Score de satisfaction de l&#39;employé concernant son équipe (échelle 1-5).&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.satisfaction_employee_equilibre_pro_perso">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.satisfaction_employee_equilibre_pro_perso">[docs]</a>
+    <span class="n">satisfaction_employee_equilibre_pro_perso</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Score de satisfaction de l&#39;employé concernant son équilibre vie professionnelle/vie personnelle (échelle 1-5).&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.note_evaluation_precedente">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.note_evaluation_precedente">[docs]</a>
+    <span class="n">note_evaluation_precedente</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Note obtenue lors de la dernière évaluation de performance (échelle 1-5).&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.note_evaluation_actuelle">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.note_evaluation_actuelle">[docs]</a>
+    <span class="n">note_evaluation_actuelle</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Note obtenue lors de l&#39;évaluation de performance actuelle (échelle 1-5).&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.heure_supplementaires">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.heure_supplementaires">[docs]</a>
+    <span class="n">heure_supplementaires</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="s2">&quot;Oui&quot;</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Indique si l&#39;employé effectue des heures supplémentaires. Valeurs attendues : </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">BINARY_FEATURES_MAPPING</span><span class="p">[</span><span class="s1">&#39;heure_supplementaires&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.augementation_salaire_precedente">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.augementation_salaire_precedente">[docs]</a>
+    <span class="n">augementation_salaire_precedente</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">Field</span><span class="p">(</span>  <span class="c1"># Note: &quot;augementation&quot; a une petite coquille, devrait être &quot;augmentation&quot;</span>
+            <span class="o">...</span><span class="p">,</span>
+            <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="s2">&quot;11 %&quot;</span><span class="p">},</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Pourcentage de la dernière augmentation de salaire (format attendu: &#39;XX %&#39;).&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.nombre_participation_pee">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.nombre_participation_pee">[docs]</a>
+    <span class="n">nombre_participation_pee</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Nombre de fois où l&#39;employé a participé au Plan d&#39;Épargne Entreprise (PEE).&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.nb_formations_suivies">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.nb_formations_suivies">[docs]</a>
+    <span class="n">nb_formations_suivies</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Nombre de formations suivies par l&#39;employé récemment (ex: sur l&#39;année N).&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.distance_domicile_travail">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.distance_domicile_travail">[docs]</a>
+    <span class="n">distance_domicile_travail</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">},</span>  <span class="c1"># Varié par rapport à l&#39;exemple global</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Distance en kilomètres entre le domicile et le lieu de travail.&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.niveau_education">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.niveau_education">[docs]</a>
+    <span class="n">niveau_education</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">Field</span><span class="p">(</span>  <span class="c1"># Si c&#39;est une échelle numérique (ex: 1=Bac, 2=Bac+2...)</span>
+            <span class="o">...</span><span class="p">,</span>
+            <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Niveau d&#39;éducation codifié (ex: 1 pour Bac, 2 pour Bac+2, ..., 5 pour Doctorat).&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
+
+    <span class="c1"># OU si c&#39;est textuel :</span>
+    <span class="c1"># niveau_education: str = Field(</span>
+    <span class="c1">#     ...,</span>
+    <span class="c1">#     json_schema_extra={&quot;example&quot;: &quot;Master&quot;},</span>
+    <span class="c1">#     description=&quot;Plus haut niveau d&#39;éducation atteint (ex: &#39;Licence&#39;, &#39;Master&#39;, &#39;Doctorat&#39;).&quot;</span>
+    <span class="c1"># )</span>
+<div class="viewcode-block" id="EmployeeInput.domaine_etude">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.domaine_etude">[docs]</a>
+    <span class="n">domaine_etude</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="s2">&quot;Informatique&quot;</span><span class="p">},</span>  <span class="c1"># Varié</span>
+        <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Domaine principal d&#39;études de l&#39;employé. Valeurs attendues : </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">LIMITED_VALUES_FEATURES</span><span class="p">[</span><span class="s1">&#39;domaine_etude&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.frequence_deplacement">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.frequence_deplacement">[docs]</a>
+    <span class="n">frequence_deplacement</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="s2">&quot;Occasionnel&quot;</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Fréquence des déplacements professionnels. Valeurs attendues : </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">ORDINAL_FEATURES_CATEGORIES</span><span class="p">[</span><span class="s1">&#39;frequence_deplacement&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EmployeeInput.annees_depuis_la_derniere_promotion">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.annees_depuis_la_derniere_promotion">[docs]</a>
+    <span class="n">annees_depuis_la_derniere_promotion</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>  <span class="c1"># Varié</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Nombre d&#39;années écoulées depuis la dernière promotion de l&#39;employé.&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+    <span class="c1"># --- VALIDATEURS ---</span>
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;genre&quot;</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="EmployeeInput.validate_genre">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.validate_genre">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_genre</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">allowed_values</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">BINARY_FEATURES_MAPPING</span><span class="p">[</span><span class="s2">&quot;genre&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_values</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Valeur pour &#39;genre&#39; non valide. Doit être l&#39;une de : </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">allowed_values</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;heure_supplementaires&quot;</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="EmployeeInput.validate_heure_supplementaires">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.validate_heure_supplementaires">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_heure_supplementaires</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">allowed_values</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">BINARY_FEATURES_MAPPING</span><span class="p">[</span><span class="s2">&quot;heure_supplementaires&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_values</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Valeur pour &#39;heure_supplementaires&#39; non valide. Doit être l&#39;une de : </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">allowed_values</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;frequence_deplacement&quot;</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="EmployeeInput.validate_frequence_deplacement">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.validate_frequence_deplacement">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_frequence_deplacement</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">allowed_values</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">ORDINAL_FEATURES_CATEGORIES</span><span class="p">[</span><span class="s2">&quot;frequence_deplacement&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_values</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Valeur pour &#39;frequence_deplacement&#39; non valide. Doit être l&#39;une de : </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">allowed_values</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;statut_marital&quot;</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="EmployeeInput.validate_statut_marital">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.validate_statut_marital">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_statut_marital</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">allowed_values</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">LIMITED_VALUES_FEATURES</span><span class="p">[</span><span class="s2">&quot;statut_marital&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_values</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Valeur pour &#39;statut_marital&#39; non valide. Doit être l&#39;une de : </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">allowed_values</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;departement&quot;</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="EmployeeInput.validate_departement">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.validate_departement">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_departement</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">allowed_values</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">LIMITED_VALUES_FEATURES</span><span class="p">[</span><span class="s2">&quot;departement&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_values</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Valeur pour &#39;departement&#39; non valide. Doit être l&#39;une de : </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">allowed_values</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;poste&quot;</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="EmployeeInput.validate_poste">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.validate_poste">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_poste</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">allowed_values</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">LIMITED_VALUES_FEATURES</span><span class="p">[</span><span class="s2">&quot;poste&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_values</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Valeur pour &#39;poste&#39; non valide. Doit être l&#39;une de : </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">allowed_values</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+    <span class="nd">@field_validator</span><span class="p">(</span><span class="s2">&quot;domaine_etude&quot;</span><span class="p">)</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="EmployeeInput.validate_domaine_etude">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.validate_domaine_etude">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_domaine_etude</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">allowed_values</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">LIMITED_VALUES_FEATURES</span><span class="p">[</span><span class="s2">&quot;domaine_etude&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_values</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Valeur pour &#39;domaine_etude&#39; non valide. Doit être l&#39;une de : </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">allowed_values</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+
+    <span class="c1"># model_config pour Pydantic V2, remplace l&#39;ancienne class Config</span>
+<div class="viewcode-block" id="EmployeeInput.model_config">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.EmployeeInput.model_config">[docs]</a>
+    <span class="n">model_config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">(</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="p">{</span>  <span class="c1"># Cet exemple est utilisé par Swagger UI pour pré-remplir le corps de la requête</span>
+                <span class="s2">&quot;age&quot;</span><span class="p">:</span> <span class="mi">45</span><span class="p">,</span>
+                <span class="s2">&quot;genre&quot;</span><span class="p">:</span> <span class="s2">&quot;M&quot;</span><span class="p">,</span>  <span class="c1"># Changé en &quot;Homme&quot; pour correspondre au format plus courant</span>
+                <span class="s2">&quot;revenu_mensuel&quot;</span><span class="p">:</span> <span class="mf">4850.0</span><span class="p">,</span>
+                <span class="s2">&quot;statut_marital&quot;</span><span class="p">:</span> <span class="s2">&quot;Célibataire&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;departement&quot;</span><span class="p">:</span> <span class="s2">&quot;Commercial&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;poste&quot;</span><span class="p">:</span> <span class="s2">&quot;Cadre Commercial&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;nombre_experiences_precedentes&quot;</span><span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+                <span class="s2">&quot;annees_dans_l_entreprise&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                <span class="s2">&quot;satisfaction_employee_environnement&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+                <span class="s2">&quot;note_evaluation_precedente&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="s2">&quot;satisfaction_employee_nature_travail&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="s2">&quot;satisfaction_employee_equipe&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="s2">&quot;satisfaction_employee_equilibre_pro_perso&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="s2">&quot;note_evaluation_actuelle&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="s2">&quot;heure_supplementaires&quot;</span><span class="p">:</span> <span class="s2">&quot;Oui&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;augementation_salaire_precedente&quot;</span><span class="p">:</span> <span class="s2">&quot;15 %&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;nombre_participation_pee&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="s2">&quot;nb_formations_suivies&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+                <span class="s2">&quot;distance_domicile_travail&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+                <span class="s2">&quot;niveau_education&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>  <span class="c1"># En supposant le format numérique pour l&#39;exemple</span>
+                <span class="s2">&quot;domaine_etude&quot;</span><span class="p">:</span> <span class="s2">&quot;Infra &amp; Cloud&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;frequence_deplacement&quot;</span><span class="p">:</span> <span class="s2">&quot;Occasionnel&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;annees_depuis_la_derniere_promotion&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="PredictionOutput">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.PredictionOutput">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">PredictionOutput</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Schéma Pydantic pour la réponse d&#39;une requête de prédiction.</span>
+<span class="sd">    Inclut l&#39;identifiant de l&#39;employé (tel que retourné par la logique de prédiction),</span>
+<span class="sd">    la probabilité de départ, et la classe prédite.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PredictionOutput.id_employe">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.PredictionOutput.id_employe">[docs]</a>
+    <span class="n">id_employe</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
+        <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span>
+    <span class="p">]</span>  <span class="c1"># L&#39;ID peut être un str (ex: index du DataFrame de prédiction) ou un int</span></div>
+
+<div class="viewcode-block" id="PredictionOutput.probabilite_depart">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.PredictionOutput.probabilite_depart">[docs]</a>
+    <span class="n">probabilite_depart</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>  <span class="c1"># Requis</span>
+        <span class="n">ge</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">le</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>  <span class="c1"># Ajout de contraintes de validation (&gt;=0 et &lt;=1)</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mf">0.65</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Probabilité que l&#39;employé quitte l&#39;entreprise (entre 0.0 et 1.0).&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="PredictionOutput.prediction_depart">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.PredictionOutput.prediction_depart">[docs]</a>
+    <span class="n">prediction_depart</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>  <span class="c1"># Requis</span>
+        <span class="n">json_schema_extra</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;example&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Prédiction de départ (0 pour &#39;Reste&#39;, 1 pour &#39;Part&#39;).&quot;</span><span class="p">,</span>
+    <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="BulkPredictionInput">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.BulkPredictionInput">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BulkPredictionInput</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Schéma Pydantic pour les requêtes de prédiction en masse.</span>
+<span class="sd">    Attend une liste d&#39;objets EmployeeInput.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BulkPredictionInput.employees">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.BulkPredictionInput.employees">[docs]</a>
+    <span class="n">employees</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">EmployeeInput</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="BulkPredictionOutput">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.BulkPredictionOutput">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BulkPredictionOutput</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Schéma Pydantic pour la réponse des prédictions en masse.</span>
+<span class="sd">    Retourne une liste d&#39;objets PredictionOutput.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BulkPredictionOutput.predictions">
+<a class="viewcode-back" href="../../autoapi/api/schemas/index.html#api.schemas.BulkPredictionOutput.predictions">[docs]</a>
+    <span class="n">predictions</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">PredictionOutput</span><span class="p">]</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Cyrille ELIE.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

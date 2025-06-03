@@ -1,0 +1,377 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>api.schemas &mdash; Documentation Attrition RH API v0.2.1</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=44cc1bf8"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" />
+    <link rel="next" title="config" href="../../config/index.html" />
+    <link rel="prev" title="api.main" href="../main/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Attrition RH API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenu:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation_guide.html">Guide d’Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_documentation.html">Documentation Technique du Modèle de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_usage_examples.html">Exemples d’Utilisation de l’API de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Guide de Contribution au Projet d’Attrition RH</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">api</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../main/index.html">api.main</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">api.schemas</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../config/index.html">config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../database/index.html">database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modeling/index.html">modeling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../data_processing/index.html">data_processing</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Attrition RH API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">api</a></li>
+      <li class="breadcrumb-item active">api.schemas</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/api/schemas/index.rst.txt" rel="nofollow"> Afficher la source de la page</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-api.schemas">
+<span id="api-schemas"></span><h1>api.schemas<a class="headerlink" href="#module-api.schemas" title="Lien vers cette rubrique"></a></h1>
+<p>Définition des schémas Pydantic pour la validation des données de l’API.</p>
+<p>Ce module contient les modèles de données utilisés par FastAPI pour :</p>
+<ul class="simple">
+<li><p>Valider les données des requêtes entrantes.</p></li>
+<li><p>Sérialiser les données des réponses sortantes.</p></li>
+<li><p>Générer automatiquement la documentation OpenAPI (Swagger UI).</p></li>
+</ul>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Lien vers cette rubrique"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#api.schemas.EmployeeInput" title="api.schemas.EmployeeInput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EmployeeInput</span></code></a></p></td>
+<td><p>Schéma Pydantic représentant les données d'entrée pour un employé</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#api.schemas.PredictionOutput" title="api.schemas.PredictionOutput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PredictionOutput</span></code></a></p></td>
+<td><p>Schéma Pydantic pour la réponse d'une requête de prédiction.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#api.schemas.BulkPredictionInput" title="api.schemas.BulkPredictionInput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BulkPredictionInput</span></code></a></p></td>
+<td><p>Schéma Pydantic pour les requêtes de prédiction en masse.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#api.schemas.BulkPredictionOutput" title="api.schemas.BulkPredictionOutput"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BulkPredictionOutput</span></code></a></p></td>
+<td><p>Schéma Pydantic pour la réponse des prédictions en masse.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Lien vers cette rubrique"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">api.schemas.</span></span><span class="sig-name descname"><span class="pre">EmployeeInput</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
+<p>Schéma Pydantic représentant les données d’entrée pour un employé
+lors d’une requête de prédiction d’attrition.</p>
+<p>Les champs correspondent aux données brutes attendues par la pipeline de preprocessing
+avant toute transformation majeure (scaling, one-hot encoding, etc.).
+Les descriptions et exemples aident à la compréhension et à l’utilisation de l’API.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.age">
+<span class="sig-name descname"><span class="pre">age</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.age"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.age" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.genre">
+<span class="sig-name descname"><span class="pre">genre</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.genre"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.genre" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.revenu_mensuel">
+<span class="sig-name descname"><span class="pre">revenu_mensuel</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.revenu_mensuel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.revenu_mensuel" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.statut_marital">
+<span class="sig-name descname"><span class="pre">statut_marital</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.statut_marital"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.statut_marital" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.departement">
+<span class="sig-name descname"><span class="pre">departement</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.departement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.departement" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.poste">
+<span class="sig-name descname"><span class="pre">poste</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.poste"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.poste" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.nombre_experiences_precedentes">
+<span class="sig-name descname"><span class="pre">nombre_experiences_precedentes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.nombre_experiences_precedentes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.nombre_experiences_precedentes" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.annees_dans_l_entreprise">
+<span class="sig-name descname"><span class="pre">annees_dans_l_entreprise</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.annees_dans_l_entreprise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.annees_dans_l_entreprise" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.satisfaction_employee_environnement">
+<span class="sig-name descname"><span class="pre">satisfaction_employee_environnement</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.satisfaction_employee_environnement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.satisfaction_employee_environnement" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.satisfaction_employee_nature_travail">
+<span class="sig-name descname"><span class="pre">satisfaction_employee_nature_travail</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.satisfaction_employee_nature_travail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.satisfaction_employee_nature_travail" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.satisfaction_employee_equipe">
+<span class="sig-name descname"><span class="pre">satisfaction_employee_equipe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.satisfaction_employee_equipe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.satisfaction_employee_equipe" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.satisfaction_employee_equilibre_pro_perso">
+<span class="sig-name descname"><span class="pre">satisfaction_employee_equilibre_pro_perso</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.satisfaction_employee_equilibre_pro_perso"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.satisfaction_employee_equilibre_pro_perso" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.note_evaluation_precedente">
+<span class="sig-name descname"><span class="pre">note_evaluation_precedente</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.note_evaluation_precedente"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.note_evaluation_precedente" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.note_evaluation_actuelle">
+<span class="sig-name descname"><span class="pre">note_evaluation_actuelle</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.note_evaluation_actuelle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.note_evaluation_actuelle" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.heure_supplementaires">
+<span class="sig-name descname"><span class="pre">heure_supplementaires</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.heure_supplementaires"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.heure_supplementaires" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.augementation_salaire_precedente">
+<span class="sig-name descname"><span class="pre">augementation_salaire_precedente</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.augementation_salaire_precedente"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.augementation_salaire_precedente" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.nombre_participation_pee">
+<span class="sig-name descname"><span class="pre">nombre_participation_pee</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.nombre_participation_pee"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.nombre_participation_pee" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.nb_formations_suivies">
+<span class="sig-name descname"><span class="pre">nb_formations_suivies</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.nb_formations_suivies"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.nb_formations_suivies" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.distance_domicile_travail">
+<span class="sig-name descname"><span class="pre">distance_domicile_travail</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.distance_domicile_travail"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.distance_domicile_travail" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.niveau_education">
+<span class="sig-name descname"><span class="pre">niveau_education</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.niveau_education"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.niveau_education" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.domaine_etude">
+<span class="sig-name descname"><span class="pre">domaine_etude</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.domaine_etude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.domaine_etude" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.frequence_deplacement">
+<span class="sig-name descname"><span class="pre">frequence_deplacement</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.frequence_deplacement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.frequence_deplacement" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.annees_depuis_la_derniere_promotion">
+<span class="sig-name descname"><span class="pre">annees_depuis_la_derniere_promotion</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.annees_depuis_la_derniere_promotion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.annees_depuis_la_derniere_promotion" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.validate_genre">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_genre</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.validate_genre"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.validate_genre" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.validate_heure_supplementaires">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_heure_supplementaires</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.validate_heure_supplementaires"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.validate_heure_supplementaires" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.validate_frequence_deplacement">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_frequence_deplacement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.validate_frequence_deplacement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.validate_frequence_deplacement" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.validate_statut_marital">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_statut_marital</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.validate_statut_marital"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.validate_statut_marital" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.validate_departement">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_departement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.validate_departement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.validate_departement" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.validate_poste">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_poste</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.validate_poste"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.validate_poste" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.validate_domaine_etude">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_domaine_etude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.validate_domaine_etude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.validate_domaine_etude" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.EmployeeInput.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><a class="reference internal" href="../../../_modules/api/schemas.html#EmployeeInput.model_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.EmployeeInput.model_config" title="Lien vers cette définition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="api.schemas.PredictionOutput">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">api.schemas.</span></span><span class="sig-name descname"><span class="pre">PredictionOutput</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/api/schemas.html#PredictionOutput"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.PredictionOutput" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
+<p>Schéma Pydantic pour la réponse d’une requête de prédiction.
+Inclut l’identifiant de l’employé (tel que retourné par la logique de prédiction),
+la probabilité de départ, et la classe prédite.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.PredictionOutput.id_employe">
+<span class="sig-name descname"><span class="pre">id_employe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#PredictionOutput.id_employe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.PredictionOutput.id_employe" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.PredictionOutput.probabilite_depart">
+<span class="sig-name descname"><span class="pre">probabilite_depart</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#PredictionOutput.probabilite_depart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.PredictionOutput.probabilite_depart" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.PredictionOutput.prediction_depart">
+<span class="sig-name descname"><span class="pre">prediction_depart</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/api/schemas.html#PredictionOutput.prediction_depart"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.PredictionOutput.prediction_depart" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="api.schemas.BulkPredictionInput">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">api.schemas.</span></span><span class="sig-name descname"><span class="pre">BulkPredictionInput</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/api/schemas.html#BulkPredictionInput"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.BulkPredictionInput" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
+<p>Schéma Pydantic pour les requêtes de prédiction en masse.
+Attend une liste d’objets EmployeeInput.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.BulkPredictionInput.employees">
+<span class="sig-name descname"><span class="pre">employees</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#api.schemas.EmployeeInput" title="api.schemas.EmployeeInput"><span class="pre">EmployeeInput</span></a><span class="p"><span class="pre">]</span></span></em><a class="reference internal" href="../../../_modules/api/schemas.html#BulkPredictionInput.employees"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.BulkPredictionInput.employees" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="api.schemas.BulkPredictionOutput">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">api.schemas.</span></span><span class="sig-name descname"><span class="pre">BulkPredictionOutput</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">/</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**data:</span> <span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/api/schemas.html#BulkPredictionOutput"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.BulkPredictionOutput" title="Lien vers cette définition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">pydantic.BaseModel</span></code></p>
+<p>Schéma Pydantic pour la réponse des prédictions en masse.
+Retourne une liste d’objets PredictionOutput.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="api.schemas.BulkPredictionOutput.predictions">
+<span class="sig-name descname"><span class="pre">predictions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#api.schemas.PredictionOutput" title="api.schemas.PredictionOutput"><span class="pre">PredictionOutput</span></a><span class="p"><span class="pre">]</span></span></em><a class="reference internal" href="../../../_modules/api/schemas.html#BulkPredictionOutput.predictions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#api.schemas.BulkPredictionOutput.predictions" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
+        <a href="../main/index.html" class="btn btn-neutral float-left" title="api.main" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Précédent</a>
+        <a href="../../config/index.html" class="btn btn-neutral float-right" title="config" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Cyrille ELIE.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

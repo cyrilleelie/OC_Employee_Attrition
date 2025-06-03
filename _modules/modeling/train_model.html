@@ -1,0 +1,346 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>modeling.train_model &mdash; Documentation Attrition RH API v0.2.1</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=44cc1bf8"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Attrition RH API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenu:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation_guide.html">Guide d’Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model_documentation.html">Documentation Technique du Modèle de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_usage_examples.html">Exemples d’Utilisation de l’API de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Guide de Contribution au Projet d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Attrition RH API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">modeling.train_model</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de modeling.train_model</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module d&#39;entraînement et d&#39;évaluation du modèle de prédiction d&#39;attrition.</span>
+
+<span class="sd">Ce script orchestre le pipeline complet de Machine Learning :</span>
+
+<span class="sd">1. Chargement des données prétraitées depuis la source configurée (PostgreSQL).</span>
+<span class="sd">2. (Optionnel) Création de features supplémentaires.</span>
+<span class="sd">3. Séparation des données en ensembles d&#39;entraînement et de test.</span>
+<span class="sd">4. Identification des types de colonnes pour le preprocessing.</span>
+<span class="sd">5. Construction d&#39;une pipeline Scikit-learn incluant :</span>
+<span class="sd">    * Un préprocesseur (ColumnTransformer) pour imputer, scaler (numériques) et encoder (catégorielles OneHot et Ordinal).</span>
+<span class="sd">    * Un classifieur (actuellement LogisticRegression).</span>
+<span class="sd">6. Entraînement de la pipeline complète sur les données d&#39;entraînement.</span>
+<span class="sd">7. Évaluation du modèle sur les données de test (Matrice de confusion, rapport de classification, F2-score).</span>
+<span class="sd">8. Sauvegarde de la pipeline entraînée pour une utilisation ultérieure (prédictions).</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">dump</span>  <span class="c1"># Pour sauvegarder la pipeline</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.model_selection</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.linear_model</span><span class="w"> </span><span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">classification_report</span><span class="p">,</span>
+    <span class="n">fbeta_score</span><span class="p">,</span>
+    <span class="n">confusion_matrix</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Fonctions et configurations importées des autres modules du projet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.data_processing.load_data</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.data_processing.preprocess</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">create_features</span><span class="p">,</span>  <span class="c1"># Utilisé pour la création de features à la volée</span>
+    <span class="n">build_preprocessor</span><span class="p">,</span>  <span class="c1"># Pour construire le ColumnTransformer</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>  <span class="c1"># Pour TARGET_VARIABLE, ORDINAL_FEATURES_CATEGORIES, MODEL_PATH</span>
+
+<span class="c1"># Configuration du logging pour ce module</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(name)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<div class="viewcode-block" id="logger">
+<a class="viewcode-back" href="../../autoapi/modeling/train_model/index.html#modeling.train_model.logger">[docs]</a>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="train_and_evaluate_pipeline">
+<a class="viewcode-back" href="../../autoapi/modeling/train_model/index.html#modeling.train_model.train_and_evaluate_pipeline">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">train_and_evaluate_pipeline</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Orchestre le chargement des données, la préparation, l&#39;entraînement d&#39;un modèle</span>
+<span class="sd">    de classification, son évaluation, et la sauvegarde de la pipeline entraînée.</span>
+
+<span class="sd">    Cette fonction est le point d&#39;entrée principal pour le processus d&#39;entraînement.</span>
+<span class="sd">    Elle utilise les configurations définies dans `config.py` et les fonctions</span>
+<span class="sd">    de `load_data.py` et `preprocess.py`.</span>
+
+<span class="sd">    Le modèle actuel est une Régression Logistique, et la métrique principale</span>
+<span class="sd">    d&#39;évaluation est le F2-score pour la classe positive (départ d&#39;employé).</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: Si la colonne cible n&#39;est pas trouvée dans les données</span>
+<span class="sd">                    après les étapes initiales de chargement et de feature engineering.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;&gt;&gt;&gt; Début du processus d&#39;entraînement et d&#39;évaluation du modèle &lt;&lt;&lt;&quot;</span><span class="p">)</span>
+
+    <span class="c1"># --- 1. Charger les données ---</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s2">&quot;Étape 1: Chargement des données depuis la source configurée (PostgreSQL).&quot;</span>
+    <span class="p">)</span>
+    <span class="n">df_loaded</span> <span class="o">=</span> <span class="n">get_data</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s2">&quot;postgres&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">df_loaded</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">df_loaded</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s2">&quot;Arrêt : Impossible de charger les données ou DataFrame vide depuis la source.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># --- 2. Création de Features (si applicable) ---</span>
+    <span class="c1"># Cette étape applique la fonction create_features pour toute ingénierie de features</span>
+    <span class="c1"># qui n&#39;aurait pas été faite avant le stockage en base, ou qui est spécifique à l&#39;entraînement.</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Étape 2: Application de la création de features (si définie).&quot;</span><span class="p">)</span>
+    <span class="n">df_featured</span> <span class="o">=</span> <span class="n">create_features</span><span class="p">(</span><span class="n">df_loaded</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">df_featured</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Arrêt : DataFrame vide après l&#39;étape de création de features.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="n">df_for_training</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df_featured</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="p">)</span>  <span class="c1"># Utiliser une copie pour les modifications suivantes</span>
+
+    <span class="c1"># --- 3. Vérification et Séparation de la Cible (y) et des Features (X) ---</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Étape 3: Séparation des features (X) et de la variable cible (y).&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">TARGET_VARIABLE</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_for_training</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;La colonne cible &#39;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">TARGET_VARIABLE</span><span class="si">}</span><span class="s2">&#39; est introuvable dans le DataFrame.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;La colonne cible &#39;</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">TARGET_VARIABLE</span><span class="si">}</span><span class="s2">&#39; n&#39;est pas présente dans les données chargées.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">y</span> <span class="o">=</span> <span class="n">df_for_training</span><span class="p">[</span><span class="n">config</span><span class="o">.</span><span class="n">TARGET_VARIABLE</span><span class="p">]</span>
+
+    <span class="c1"># Exclure la cible et les colonnes non-feature de X</span>
+    <span class="n">cols_to_exclude_from_features</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">TARGET_VARIABLE</span><span class="p">,</span>
+        <span class="s2">&quot;a_quitte_l_entreprise&quot;</span><span class="p">,</span>  <span class="c1"># Version texte originale de la cible, si présente</span>
+        <span class="s2">&quot;id_employee&quot;</span><span class="p">,</span>  <span class="c1"># Identifiant, non utilisé comme feature</span>
+        <span class="s2">&quot;date_creation_enregistrement&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;date_derniere_modification&quot;</span><span class="p">,</span>
+        <span class="c1"># Ajoutez d&#39;autres colonnes à exclure si nécessaire</span>
+    <span class="p">]</span>
+
+    <span class="n">X</span> <span class="o">=</span> <span class="n">df_for_training</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span>
+        <span class="n">columns</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">col</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">cols_to_exclude_from_features</span>
+            <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df_for_training</span><span class="o">.</span><span class="n">columns</span>
+        <span class="p">],</span>
+        <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span>  <span class="c1"># ignore si une colonne de la liste n&#39;est pas trouvée dans df_for_training</span>
+    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Nombre de features initiales dans X avant train_test_split : </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="c1"># logger.debug(f&quot;Colonnes dans X : {X.columns.tolist()}&quot;) # Décommentez pour débogage détaillé</span>
+
+    <span class="c1"># --- 4. Séparation en Ensembles d&#39;Entraînement et de Test ---</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s2">&quot;Étape 4: Séparation des données en ensembles d&#39;entraînement et de test (80%/20%).&quot;</span>
+    <span class="p">)</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">,</span>
+        <span class="n">test_size</span><span class="o">=</span><span class="mf">0.20</span><span class="p">,</span>  <span class="c1"># 20% des données pour le test</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span>  <span class="c1"># Pour la reproductibilité</span>
+        <span class="n">stratify</span><span class="o">=</span><span class="n">y</span><span class="p">,</span>  <span class="c1"># Maintient la proportion des classes dans les deux ensembles</span>
+    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Dimensions de l&#39;ensemble d&#39;entraînement - X_train: </span><span class="si">{</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, y_train: </span><span class="si">{</span><span class="n">y_train</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Dimensions de l&#39;ensemble de test - X_test: </span><span class="si">{</span><span class="n">X_test</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">, y_test: </span><span class="si">{</span><span class="n">y_test</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
+    <span class="c1"># --- 5. Identification des Types de Colonnes pour le Préprocessing (basé sur X_train) ---</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s2">&quot;Étape 5: Identification des types de colonnes pour le préprocessing (sur X_train).&quot;</span>
+    <span class="p">)</span>
+    <span class="n">potential_numerical_cols</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span>
+        <span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">]</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">ordinal_to_encode</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">ORDINAL_FEATURES_CATEGORIES</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="p">)</span>  <span class="c1"># Colonnes définies comme ordinales</span>
+
+    <span class="c1"># Les colonnes numériques à scaler sont celles qui sont numériques et non ordinales</span>
+    <span class="n">numerical_to_scale</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">potential_numerical_cols</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ordinal_to_encode</span>
+    <span class="p">]</span>
+    <span class="c1"># Les colonnes pour OneHotEncoding sont celles de type object/category qui ne sont pas ordinales</span>
+    <span class="n">onehot_to_encode</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">col</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">X_train</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span>
+            <span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">]</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ordinal_to_encode</span>
+    <span class="p">]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Colonnes numériques à scaler : </span><span class="si">{</span><span class="n">numerical_to_scale</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Colonnes pour OneHotEncoding : </span><span class="si">{</span><span class="n">onehot_to_encode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Colonnes pour OrdinalEncoding : </span><span class="si">{</span><span class="n">ordinal_to_encode</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># --- 6. Construction du Préprocesseur ---</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Étape 6: Construction du préprocesseur Scikit-learn.&quot;</span><span class="p">)</span>
+    <span class="n">preprocessor</span> <span class="o">=</span> <span class="n">build_preprocessor</span><span class="p">(</span>
+        <span class="n">numerical_cols</span><span class="o">=</span><span class="n">numerical_to_scale</span><span class="p">,</span>
+        <span class="n">onehot_cols</span><span class="o">=</span><span class="n">onehot_to_encode</span><span class="p">,</span>
+        <span class="n">ordinal_cols</span><span class="o">=</span><span class="n">ordinal_to_encode</span><span class="p">,</span>
+        <span class="n">ordinal_categories_map</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ORDINAL_FEATURES_CATEGORIES</span><span class="p">,</span>  <span class="c1"># Le nom du paramètre a été harmonisé</span>
+    <span class="p">)</span>
+
+    <span class="c1"># --- 7. Définition du Modèle de Classification ---</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Étape 7: Définition du modèle (LogisticRegression).&quot;</span><span class="p">)</span>
+    <span class="n">classifier</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">(</span>
+        <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">class_weight</span><span class="o">=</span><span class="s2">&quot;balanced&quot;</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">1000</span>
+    <span class="p">)</span>
+
+    <span class="c1"># --- 8. Création de la Pipeline Complète (Préprocesseur + Classifieur) ---</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Étape 8: Création de la pipeline Scikit-learn complète.&quot;</span><span class="p">)</span>
+    <span class="n">full_pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span>
+        <span class="n">steps</span><span class="o">=</span><span class="p">[(</span><span class="s2">&quot;preprocessor&quot;</span><span class="p">,</span> <span class="n">preprocessor</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;classifier&quot;</span><span class="p">,</span> <span class="n">classifier</span><span class="p">)]</span>
+    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Pipeline complète créée.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># --- 9. Entraînement de la Pipeline Complète ---</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Étape 9: Entraînement de la pipeline sur l&#39;ensemble d&#39;entraînement...&quot;</span><span class="p">)</span>
+    <span class="n">full_pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Entraînement de la pipeline terminé.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># --- 10. Évaluation de la Pipeline sur l&#39;Ensemble de Test ---</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Étape 10: Évaluation de la pipeline sur l&#39;ensemble de test...&quot;</span><span class="p">)</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">full_pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    <span class="c1"># y_pred_proba = full_pipeline.predict_proba(X_test)[:, 1] # Gardé pour référence, mais non utilisé actuellement</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">--- Résultats de l&#39;Évaluation sur le Jeu de Test ---&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Matrice de Confusion :</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Rapport de Classification :</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">target_names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;Non&quot;</span><span class="p">,</span> <span class="s2">&quot;Oui&quot;</span><span class="p">]),</span>
+    <span class="p">)</span>
+
+    <span class="n">f2_scorer</span> <span class="o">=</span> <span class="n">fbeta_score</span><span class="p">(</span>
+        <span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">zero_division</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">)</span>  <span class="c1"># Ajout de zero_division pour éviter warning/erreur</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">F2-Score (privilégie le Rappel pour la classe &#39;Oui&#39;) : </span><span class="si">{</span><span class="n">f2_scorer</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># --- 11. Sauvegarde de la Pipeline Ajustée ---</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Étape 11: Sauvegarde de la pipeline entraînée...&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">MODELS_DIR</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span>
+            <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>  <span class="c1"># S&#39;assurer que le dossier existe</span>
+        <span class="n">dump</span><span class="p">(</span><span class="n">full_pipeline</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">MODEL_PATH</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Pipeline complète et ajustée sauvegardée dans : </span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">MODEL_PATH</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e_save</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Erreur lors de la sauvegarde de la pipeline : </span><span class="si">{</span><span class="n">e_save</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;&gt;&gt;&gt; Fin du processus d&#39;entraînement et d&#39;évaluation &lt;&lt;&lt;&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">train_and_evaluate_pipeline</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Cyrille ELIE.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

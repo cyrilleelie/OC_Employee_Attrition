@@ -1,0 +1,386 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>data_processing.load_data &mdash; Documentation Attrition RH API v0.2.1</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=44cc1bf8"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Attrition RH API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenu:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation_guide.html">Guide d’Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model_documentation.html">Documentation Technique du Modèle de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_usage_examples.html">Exemples d’Utilisation de l’API de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Guide de Contribution au Projet d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Attrition RH API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">data_processing.load_data</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de data_processing.load_data</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Module pour le chargement et la préparation initiale des données.</span>
+
+<span class="sd">Fonctions pour charger les données brutes depuis des fichiers CSV, les fusionner, et préparer les clés de jointure. Fournit également des fonctions pour charger les données depuis une base de données PostgreSQL une fois peuplée.</span>
+<span class="sd">La fonction principale `get_data` sert d&#39;interface pour obtenir les données pour le reste de l&#39;application, typiquement pour l&#39;entraînement du modèle.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Session</span><span class="p">,</span>
+<span class="p">)</span>  <span class="c1"># Importé pour être utilisé dans load_data_from_postgres</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.database.database_setup</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SessionLocal</span><span class="p">,</span>
+<span class="p">)</span>  <span class="c1"># engine est utilisé implicitement par read_sql_query via db.bind</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src.database.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Employee</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">src</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="c1"># Configuration du logging pour ce module</span>
+<span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+    <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(name)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span>
+<span class="p">)</span>
+<div class="viewcode-block" id="logger">
+<a class="viewcode-back" href="../../autoapi/data_processing/load_data/index.html#data_processing.load_data.logger">[docs]</a>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="load_data_from_csv">
+<a class="viewcode-back" href="../../autoapi/data_processing/load_data/index.html#data_processing.load_data.load_data_from_csv">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_data_from_csv</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">PROCESSED_DATA_PATH</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Charge les données depuis un unique fichier CSV spécifié.</span>
+
+<span class="sd">    Utilisé comme fonction de secours ou pour charger un dataset déjà traité et sauvegardé en CSV.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        path (str, optional): Chemin vers le fichier CSV.</span>
+<span class="sd">                              Par défaut, utilise config.PROCESSED_DATA_PATH.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame | None: DataFrame Pandas contenant les données chargées,</span>
+<span class="sd">                             ou None si le fichier n&#39;est pas trouvé.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Chargement des données CSV depuis </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Données CSV chargées avec succès depuis </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> lignes.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fichier CSV non trouvé : </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Erreur inattendue lors du chargement du CSV </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="load_data_from_postgres">
+<a class="viewcode-back" href="../../autoapi/data_processing/load_data/index.html#data_processing.load_data.load_data_from_postgres">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_data_from_postgres</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Charge l&#39;intégralité des données de la table &#39;employees&#39; depuis PostgreSQL</span>
+<span class="sd">    dans un DataFrame Pandas.</span>
+
+<span class="sd">    Utilise SQLAlchemy pour interagir avec la base de données configurée.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: DataFrame Pandas contenant les données de la table &#39;employees&#39;.</span>
+<span class="sd">                      Retourne un DataFrame vide en cas d&#39;erreur ou si la table est vide.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">db</span><span class="p">:</span> <span class="n">Session</span> <span class="o">=</span> <span class="n">SessionLocal</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Chargement des données depuis la table &#39;employees&#39; de PostgreSQL...&quot;</span>
+        <span class="p">)</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+            <span class="n">Employee</span>
+        <span class="p">)</span>  <span class="c1"># Construit une requête pour sélectionner toutes les colonnes de Employee</span>
+        <span class="c1"># Exécute la requête et charge les résultats dans un DataFrame Pandas</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_sql_query</span><span class="p">(</span><span class="n">sql</span><span class="o">=</span><span class="n">query</span><span class="o">.</span><span class="n">statement</span><span class="p">,</span> <span class="n">con</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">bind</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Aucune donnée trouvée dans la table &#39;employees&#39;. Le DataFrame est vide.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="si">}</span><span class="s2"> lignes chargées depuis la table &#39;employees&#39;.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Erreur lors du chargement des données depuis PostgreSQL : </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>  <span class="c1"># Retourner un DataFrame vide en cas d&#39;erreur</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Session PostgreSQL fermée pour load_data_from_postgres.&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_data">
+<a class="viewcode-back" href="../../autoapi/data_processing/load_data/index.html#data_processing.load_data.get_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_data</span><span class="p">(</span><span class="n">source</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;postgres&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fonction principale pour obtenir le jeu de données pour l&#39;application.</span>
+
+<span class="sd">    Sert d&#39;interface pour charger les données soit depuis PostgreSQL (par défaut),</span>
+<span class="sd">    soit depuis des fichiers CSV bruts (via `load_and_merge_csvs`).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        source (str, optional): La source des données. Peut être &quot;postgres&quot; ou &quot;csv&quot;.</span>
+<span class="sd">                                Par défaut à &quot;postgres&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame | None: DataFrame Pandas contenant les données, ou None si une</span>
+<span class="sd">                             erreur majeure de chargement se produit (ex: CSV introuvables).</span>
+<span class="sd">                             Peut retourner un DataFrame vide si la source est vide (ex: table PG vide).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Récupération des données depuis la source : </span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s2">&quot;postgres&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">load_data_from_postgres</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">source</span> <span class="o">==</span> <span class="s2">&quot;csv&quot;</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;Chargement depuis les CSV bruts via load_and_merge_csvs. &quot;</span>
+            <span class="s2">&quot;Cette source est principalement pour le peuplement initial de la BDD.&quot;</span>
+        <span class="p">)</span>
+        <span class="c1"># L&#39;import local est inhabituel. S&#39;il est utilisé, il devrait être en haut du fichier.</span>
+        <span class="c1"># Cependant, si load_and_merge_csvs est spécifique à ce cas, le garder ici</span>
+        <span class="c1"># évite un import circulaire si load_and_merge_csvs devait importer qqch de ce module.</span>
+        <span class="c1"># Pour l&#39;instant, nous le laissons, mais c&#39;est un point d&#39;attention.</span>
+        <span class="c1"># from .load_data import load_and_merge_csvs # Ceci créerait une récursion.</span>
+        <span class="c1"># Il faut s&#39;assurer que load_and_merge_csvs est bien défini dans ce même fichier.</span>
+        <span class="k">return</span> <span class="n">load_and_merge_csvs</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Source de données non reconnue : </span><span class="si">{</span><span class="n">source</span><span class="si">}</span><span class="s2">. Tentative avec PostgreSQL par défaut.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">load_data_from_postgres</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="load_and_merge_csvs">
+<a class="viewcode-back" href="../../autoapi/data_processing/load_data/index.html#data_processing.load_data.load_and_merge_csvs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_and_merge_csvs</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Charge les données depuis les trois fichiers CSV bruts (`extrait_sirh.csv`,</span>
+<span class="sd">    `extrait_eval.csv`, `extrait_sondage.csv`), prépare les clés de jointure `id_employee`</span>
+<span class="sd">    (notamment à partir de `eval_number` et `code_sondage`), et fusionne les DataFrames.</span>
+
+<span class="sd">    Cette fonction est principalement utilisée pour le peuplement initial de la base de données.</span>
+<span class="sd">    Elle s&#39;assure que les `id_employee` sont traités comme des chaînes de caractères pour</span>
+<span class="sd">    des fusions cohérentes.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame | None: Un DataFrame fusionné contenant les données des trois sources,</span>
+<span class="sd">                             ou None si une erreur critique se produit (ex: fichier introuvable,</span>
+<span class="sd">                             colonne clé de jointure manquante).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Chargement des fichiers CSV bruts pour fusion...&quot;</span><span class="p">)</span>
+        <span class="n">df_sirh</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">RAW_SIRH_PATH</span><span class="p">)</span>
+        <span class="n">df_eval</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">RAW_EVAL_PATH</span><span class="p">)</span>
+        <span class="n">df_sondage</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">RAW_SONDAGE_PATH</span><span class="p">)</span>
+
+        <span class="c1"># Préparation de df_eval</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Préparation de la clé de jointure &#39;id_employee&#39; dans df_eval à partir de &#39;eval_number&#39;...&quot;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;eval_number&quot;</span> <span class="ow">in</span> <span class="n">df_eval</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df_eval</span><span class="p">[</span><span class="s2">&quot;id_employee_str_temp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">df_eval</span><span class="p">[</span><span class="s2">&quot;eval_number&quot;</span><span class="p">]</span>
+                <span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Prend tout après le premier &#39;_&#39;</span>
+            <span class="p">)</span>
+            <span class="n">numeric_ids_for_check</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span>
+                <span class="n">df_eval</span><span class="p">[</span><span class="s2">&quot;id_employee_str_temp&quot;</span><span class="p">],</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;coerce&quot;</span>
+            <span class="p">)</span>
+            <span class="n">nan_count</span> <span class="o">=</span> <span class="n">numeric_ids_for_check</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">nan_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nan_count</span><span class="si">}</span><span class="s2"> &#39;eval_number&#39; (après extraction) n&#39;ont pas pu être convertis &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;en id_employee numériques valides et sont devenus NaN.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">df_eval</span><span class="p">[</span><span class="s2">&quot;id_employee&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_eval</span><span class="p">[</span><span class="s2">&quot;id_employee_str_temp&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
+                <span class="nb">str</span>
+            <span class="p">)</span>  <span class="c1"># Clé finale en string</span>
+            <span class="n">df_eval</span> <span class="o">=</span> <span class="n">df_eval</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;id_employee_str_temp&quot;</span><span class="p">])</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;&#39;id_employee&#39; créé et formaté en string dans df_eval.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;La colonne &#39;eval_number&#39; est introuvable dans df_eval. Impossible de créer &#39;id_employee&#39;.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># Préparation de df_sondage</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s2">&quot;Préparation de la clé de jointure &#39;id_employee&#39; dans df_sondage à partir de &#39;code_sondage&#39;...&quot;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="s2">&quot;code_sondage&quot;</span> <span class="ow">in</span> <span class="n">df_sondage</span><span class="o">.</span><span class="n">columns</span>
+        <span class="p">):</span>  <span class="c1"># Supposons que code_sondage est directement l&#39;id_employee</span>
+            <span class="c1"># Si code_sondage nécessite une transformation similaire à eval_number, appliquez-la ici.</span>
+            <span class="c1"># Pour cet exemple, on suppose que code_sondage EST l&#39;id_employee.</span>
+            <span class="n">df_sondage</span><span class="p">[</span><span class="s2">&quot;id_employee&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_sondage</span><span class="p">[</span><span class="s2">&quot;code_sondage&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+            <span class="c1"># Si vous aviez &#39;id_employee_str_temp&#39; ici aussi, n&#39;oubliez pas de le drop.</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s2">&quot;&#39;id_employee&#39; (depuis code_sondage) formaté en string dans df_sondage.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Si &#39;code_sondage&#39; n&#39;existe pas, on pourrait vérifier si &#39;id_employee&#39; existe déjà</span>
+            <span class="k">if</span> <span class="s2">&quot;id_employee&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_sondage</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Ni &#39;code_sondage&#39; ni &#39;id_employee&#39; trouvés dans df_sondage.&quot;</span>
+                <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># id_employee existe déjà, on s&#39;assure juste du type</span>
+                <span class="n">df_sondage</span><span class="p">[</span><span class="s2">&quot;id_employee&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_sondage</span><span class="p">[</span><span class="s2">&quot;id_employee&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;&#39;id_employee&#39; existant dans df_sondage formaté en string.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Standardisation du type de &#39;id_employee&#39; dans df_sirh</span>
+        <span class="k">if</span> <span class="s2">&quot;id_employee&quot;</span> <span class="ow">in</span> <span class="n">df_sirh</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df_sirh</span><span class="p">[</span><span class="s2">&quot;id_employee&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df_sirh</span><span class="p">[</span><span class="s2">&quot;id_employee&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;La colonne &#39;id_employee&#39; est introuvable dans df_sirh.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Fusion des DataFrames (df_sirh &lt;- df_eval &lt;- df_sondage)...&quot;</span><span class="p">)</span>
+        <span class="n">df_merged</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df_sirh</span><span class="p">,</span> <span class="n">df_eval</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;id_employee&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+        <span class="n">df_merged</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df_merged</span><span class="p">,</span> <span class="n">df_sondage</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;id_employee&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Données fusionnées avec succès : </span><span class="si">{</span><span class="n">df_merged</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> lignes, </span><span class="si">{</span><span class="n">df_merged</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> colonnes.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">df_merged</span>
+
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Erreur de chargement CSV : Fichier non trouvé - </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Erreur inattendue lors du chargement/fusion CSV : </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;--- Test du chargement des données depuis PostgreSQL ---&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="data_from_db">
+<a class="viewcode-back" href="../../autoapi/data_processing/load_data/index.html#data_processing.load_data.data_from_db">[docs]</a>
+    <span class="n">data_from_db</span> <span class="o">=</span> <span class="n">get_data</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="s2">&quot;postgres&quot;</span><span class="p">)</span></div>
+
+    <span class="k">if</span> <span class="n">data_from_db</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">data_from_db</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Premières lignes de data_from_db:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">data_from_db</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Dimensions des données depuis DB : </span><span class="si">{</span><span class="n">data_from_db</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># print(f&quot;\nTypes de données depuis DB :\n{data_from_db.dtypes}&quot;) # Peut être verbeux</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;Aucune donnée chargée depuis la base ou une erreur s&#39;est produite lors du chargement.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Décommentez pour tester le chargement et la fusion des CSV bruts</span>
+    <span class="c1"># logger.info(&quot;\n--- Test du chargement et de la fusion des CSV bruts ---&quot;)</span>
+    <span class="c1"># data_from_csv_merge = get_data(source=&quot;csv&quot;)</span>
+    <span class="c1"># if data_from_csv_merge is not None and not data_from_csv_merge.empty:</span>
+    <span class="c1">#     print(&quot;\nPremières lignes de data_from_csv_merge:&quot;)</span>
+    <span class="c1">#     print(data_from_csv_merge.head())</span>
+    <span class="c1">#     print(f&quot;\nDimensions des données fusionnées depuis CSV : {data_from_csv_merge.shape}&quot;)</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     print(&quot;Aucune donnée chargée depuis les CSV ou une erreur s&#39;est produite lors de la fusion.&quot;)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Cyrille ELIE.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

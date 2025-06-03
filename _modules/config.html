@@ -1,0 +1,242 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>config &mdash; Documentation Attrition RH API v0.2.1</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=44cc1bf8"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/translations.js?v=e6b791cb"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Recherche" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Attrition RH API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenu:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation_guide.html">Guide d’Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model_documentation.html">Documentation Technique du Modèle de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api_usage_examples.html">Exemples d’Utilisation de l’API de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Guide de Contribution au Projet d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Attrition RH API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">config</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de config</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Dans src/config.py</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+
+<span class="n">load_dotenv</span><span class="p">()</span>
+
+<div class="viewcode-block" id="BASE_DIR">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.BASE_DIR">[docs]</a>
+<span class="n">BASE_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span></div>
+
+<div class="viewcode-block" id="DATA_DIR">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.DATA_DIR">[docs]</a>
+<span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span></div>
+
+<div class="viewcode-block" id="MODELS_DIR">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.MODELS_DIR">[docs]</a>
+<span class="n">MODELS_DIR</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s2">&quot;models&quot;</span></div>
+
+<div class="viewcode-block" id="NOTEBOOKS_DIR">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.NOTEBOOKS_DIR">[docs]</a>
+<span class="n">NOTEBOOKS_DIR</span> <span class="o">=</span> <span class="n">BASE_DIR</span> <span class="o">/</span> <span class="s2">&quot;notebooks&quot;</span></div>
+
+
+<div class="viewcode-block" id="RAW_SIRH_PATH">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.RAW_SIRH_PATH">[docs]</a>
+<span class="n">RAW_SIRH_PATH</span> <span class="o">=</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;raw&quot;</span> <span class="o">/</span> <span class="s2">&quot;extrait_sirh.csv&quot;</span></div>
+
+<div class="viewcode-block" id="RAW_EVAL_PATH">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.RAW_EVAL_PATH">[docs]</a>
+<span class="n">RAW_EVAL_PATH</span> <span class="o">=</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;raw&quot;</span> <span class="o">/</span> <span class="s2">&quot;extrait_eval.csv&quot;</span></div>
+
+<div class="viewcode-block" id="RAW_SONDAGE_PATH">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.RAW_SONDAGE_PATH">[docs]</a>
+<span class="n">RAW_SONDAGE_PATH</span> <span class="o">=</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;raw&quot;</span> <span class="o">/</span> <span class="s2">&quot;extrait_sondage.csv&quot;</span></div>
+
+<div class="viewcode-block" id="PROCESSED_DATA_PATH">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.PROCESSED_DATA_PATH">[docs]</a>
+<span class="n">PROCESSED_DATA_PATH</span> <span class="o">=</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">&quot;processed&quot;</span> <span class="o">/</span> <span class="s2">&quot;data_rh_final.csv&quot;</span></div>
+
+
+<div class="viewcode-block" id="MODEL_NAME">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.MODEL_NAME">[docs]</a>
+<span class="n">MODEL_NAME</span> <span class="o">=</span> <span class="s2">&quot;attrition_logistic_regression.joblib&quot;</span></div>
+
+<div class="viewcode-block" id="MODEL_PATH">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.MODEL_PATH">[docs]</a>
+<span class="n">MODEL_PATH</span> <span class="o">=</span> <span class="n">MODELS_DIR</span> <span class="o">/</span> <span class="n">MODEL_NAME</span></div>
+
+
+<div class="viewcode-block" id="TARGET_VARIABLE">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.TARGET_VARIABLE">[docs]</a>
+<span class="n">TARGET_VARIABLE</span> <span class="o">=</span> <span class="s2">&quot;a_quitte_l_entreprise_numeric&quot;</span></div>
+
+
+<div class="viewcode-block" id="DB_USER">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.DB_USER">[docs]</a>
+<span class="n">DB_USER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;POSTGRES_USER&quot;</span><span class="p">,</span> <span class="s2">&quot;default_user&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DB_PASSWORD">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.DB_PASSWORD">[docs]</a>
+<span class="n">DB_PASSWORD</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;POSTGRES_PASSWORD&quot;</span><span class="p">,</span> <span class="s2">&quot;default_password&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DB_HOST">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.DB_HOST">[docs]</a>
+<span class="n">DB_HOST</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;POSTGRES_HOST&quot;</span><span class="p">,</span> <span class="s2">&quot;localhost&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DB_PORT">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.DB_PORT">[docs]</a>
+<span class="n">DB_PORT</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;POSTGRES_PORT&quot;</span><span class="p">,</span> <span class="s2">&quot;5432&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DB_NAME">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.DB_NAME">[docs]</a>
+<span class="n">DB_NAME</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;POSTGRES_DB&quot;</span><span class="p">,</span> <span class="s2">&quot;attrition_db&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DATABASE_URL">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.DATABASE_URL">[docs]</a>
+<span class="n">DATABASE_URL</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;postgresql://</span><span class="si">{</span><span class="n">DB_USER</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">DB_PASSWORD</span><span class="si">}</span><span class="s2">@</span><span class="si">{</span><span class="n">DB_HOST</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">DB_PORT</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">DB_NAME</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+<div class="viewcode-block" id="API_TITLE">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.API_TITLE">[docs]</a>
+<span class="n">API_TITLE</span> <span class="o">=</span> <span class="s2">&quot;API de Prédiction d&#39;Attrition RH&quot;</span></div>
+
+<div class="viewcode-block" id="API_VERSION">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.API_VERSION">[docs]</a>
+<span class="n">API_VERSION</span> <span class="o">=</span> <span class="s2">&quot;0.1.0&quot;</span></div>
+
+
+<div class="viewcode-block" id="ENABLE_API_DB_LOGGING">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.ENABLE_API_DB_LOGGING">[docs]</a>
+<span class="n">ENABLE_API_DB_LOGGING</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;ENABLE_API_DB_LOGGING&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;true&quot;</span></div>
+
+
+<div class="viewcode-block" id="BINARY_FEATURES_MAPPING">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.BINARY_FEATURES_MAPPING">[docs]</a>
+<span class="n">BINARY_FEATURES_MAPPING</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;genre&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;M&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+    <span class="s2">&quot;heure_supplementaires&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Non&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Oui&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+<span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="ORDINAL_FEATURES_CATEGORIES">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.ORDINAL_FEATURES_CATEGORIES">[docs]</a>
+<span class="n">ORDINAL_FEATURES_CATEGORIES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;frequence_deplacement&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Aucun&quot;</span><span class="p">,</span> <span class="s2">&quot;Occasionnel&quot;</span><span class="p">,</span> <span class="s2">&quot;Frequent&quot;</span><span class="p">]</span>
+<span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="LIMITED_VALUES_FEATURES">
+<a class="viewcode-back" href="../autoapi/config/index.html#config.LIMITED_VALUES_FEATURES">[docs]</a>
+<span class="n">LIMITED_VALUES_FEATURES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;statut_marital&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Célibataire&quot;</span><span class="p">,</span> <span class="s2">&quot;Marié(e)&quot;</span><span class="p">,</span> <span class="s2">&quot;Divorcé(e)&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;departement&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Commercial&quot;</span><span class="p">,</span> <span class="s2">&quot;Consulting&quot;</span><span class="p">,</span> <span class="s2">&quot;Ressources Humaines&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;poste&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;Cadre Commercial&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Assistant de Direction&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Consultant&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Tech Lead&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Manager&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Représentant Commercial&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Directeur Technique&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Senior Manager&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Ressources Humaines&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;domaine_etude&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;Infra &amp; Cloud&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Autre&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Transformation Digitale&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Marketing&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Entrepreunariat&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Ressources Humaines&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+<span class="p">}</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Cyrille ELIE.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

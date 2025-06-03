@@ -1,0 +1,198 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>database.database_setup &mdash; Documentation Attrition RH API v0.2.1</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=44cc1bf8"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Attrition RH API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenu:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation_guide.html">Guide d’Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model_documentation.html">Documentation Technique du Modèle de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api_usage_examples.html">Exemples d’Utilisation de l’API de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Guide de Contribution au Projet d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Attrition RH API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Code du module</a></li>
+      <li class="breadcrumb-item active">database.database_setup</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Code source de database.database_setup</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Configuration centrale de SQLAlchemy pour la connexion à la base de données.</span>
+
+<span class="sd">Ce module initialise l&#39;objet `engine` de SQLAlchemy, la fabrique de sessions `SessionLocal`, et la classe de base déclarative `Base` pour les modèles ORM. Il fournit également une fonction de dépendance (`get_db`) pour FastAPI afin de gérer les sessions de base de données par requête.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_engine</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sqlalchemy.orm</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">sessionmaker</span><span class="p">,</span>
+    <span class="n">declarative_base</span><span class="p">,</span>
+    <span class="n">Session</span> <span class="k">as</span> <span class="n">SQLAlchemySession</span><span class="p">,</span>
+<span class="p">)</span>  <span class="c1"># Pour le type hint</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generator</span>  <span class="c1"># Pour le type hint de get_db</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">src</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>  <span class="c1"># Pour récupérer DATABASE_URL</span>
+
+<span class="c1"># L&#39;URL de connexion à la base de données, récupérée depuis la configuration.</span>
+<span class="c1"># Format attendu : &quot;postgresql://utilisateur:motdepasse@hote:port/nom_base_de_donnees&quot;</span>
+<div class="viewcode-block" id="SQLALCHEMY_DATABASE_URL">
+<a class="viewcode-back" href="../../autoapi/database/database_setup/index.html#database.database_setup.SQLALCHEMY_DATABASE_URL">[docs]</a>
+<span class="n">SQLALCHEMY_DATABASE_URL</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">DATABASE_URL</span></div>
+
+
+<span class="c1"># Crée l&#39;objet Engine de SQLAlchemy.</span>
+<span class="c1"># C&#39;est le point d&#39;entrée principal pour la communication avec la base de données.</span>
+<span class="c1"># Il gère le pool de connexions et le dialecte spécifique à PostgreSQL.</span>
+<div class="viewcode-block" id="engine">
+<a class="viewcode-back" href="../../autoapi/database/database_setup/index.html#database.database_setup.engine">[docs]</a>
+<span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="n">SQLALCHEMY_DATABASE_URL</span><span class="p">)</span></div>
+
+
+<span class="c1"># Crée une classe SessionLocal, qui est une fabrique de sessions.</span>
+<span class="c1"># Chaque instance de SessionLocal sera une session de base de données transactionnelle.</span>
+<span class="c1"># - autocommit=False: Les changements ne sont pas commités automatiquement.</span>
+<span class="c1"># - autoflush=False: Les objets ne sont pas envoyés à la BDD avant le commit explicite.</span>
+<span class="c1"># - bind=engine: Lie cette fabrique de sessions à notre engine PostgreSQL.</span>
+<div class="viewcode-block" id="SessionLocal">
+<a class="viewcode-back" href="../../autoapi/database/database_setup/index.html#database.database_setup.SessionLocal">[docs]</a>
+<span class="n">SessionLocal</span> <span class="o">=</span> <span class="n">sessionmaker</span><span class="p">(</span><span class="n">autocommit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">autoflush</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bind</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span></div>
+
+
+<span class="c1"># Crée une classe Base pour les modèles ORM déclaratifs.</span>
+<span class="c1"># Toutes les classes de modèles (ex: Employee, ApiPredictionLog) hériteront de cette Base.</span>
+<span class="c1"># Elle contient la métadonnée qui décrit comment les classes Python sont mappées aux tables de la BDD.</span>
+<div class="viewcode-block" id="Base">
+<a class="viewcode-back" href="../../autoapi/database/database_setup/index.html#database.database_setup.Base">[docs]</a>
+<span class="n">Base</span> <span class="o">=</span> <span class="n">declarative_base</span><span class="p">()</span></div>
+
+
+
+<span class="c1"># --- Fonction de création de tables ---</span>
+<span class="c1"># NOTE : Vous avez une fonction similaire (voire identique) dans src/database/init_db.py.</span>
+<span class="c1"># Il est généralement préférable d&#39;avoir une seule source de vérité pour cette action.</span>
+<span class="c1"># Vous pourriez soit supprimer cette fonction et laisser init_db.py gérer la création,</span>
+<span class="c1"># soit faire en sorte que init_db.py appelle CETTE fonction.</span>
+<span class="c1"># Pour l&#39;instant, je documente celle-ci telle qu&#39;elle est.</span>
+<div class="viewcode-block" id="create_db_tables">
+<a class="viewcode-back" href="../../autoapi/database/database_setup/index.html#database.database_setup.create_db_tables">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_db_tables</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Crée toutes les tables dans la base de données définies par les modèles</span>
+<span class="sd">    qui héritent de `Base`.</span>
+
+<span class="sd">    Cette fonction est idempotente : elle ne créera les tables que si elles</span>
+<span class="sd">    n&#39;existent pas déjà.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Base.metadata contient toutes les informations sur les tables à créer.</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">create_all</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">engine</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># --- Dépendance FastAPI pour les sessions de base de données ---</span>
+<div class="viewcode-block" id="get_db">
+<a class="viewcode-back" href="../../autoapi/database/database_setup/index.html#database.database_setup.get_db">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_db</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">SQLAlchemySession</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dépendance FastAPI pour obtenir une session de base de données SQLAlchemy.</span>
+
+<span class="sd">    Ce générateur crée une nouvelle session de base de données pour chaque requête entrante,</span>
+<span class="sd">    la fournit à la fonction de chemin (endpoint), puis s&#39;assure qu&#39;elle est fermée</span>
+<span class="sd">    après que la requête a été traitée (même en cas d&#39;erreur).</span>
+
+<span class="sd">    Yields:</span>
+<span class="sd">        SQLAlchemySession: Une session de base de données SQLAlchemy.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">db</span> <span class="o">=</span> <span class="n">SessionLocal</span><span class="p">()</span>  <span class="c1"># Crée une nouvelle session</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">db</span>  <span class="c1"># Fournit la session à la fonction de l&#39;endpoint</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">db</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>  <span class="c1"># S&#39;assure que la session est toujours fermée après usage</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Cyrille ELIE.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

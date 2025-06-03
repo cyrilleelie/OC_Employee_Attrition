@@ -1,0 +1,366 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documentation Technique du Modèle de Prédiction d’Attrition RH &mdash; Documentation Attrition RH API v0.2.1</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=44cc1bf8"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=e6b791cb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Recherche" href="search.html" />
+    <link rel="next" title="Exemples d’Utilisation de l’API de Prédiction d’Attrition RH" href="api_usage_examples.html" />
+    <link rel="prev" title="Guide d’Installation" href="installation_guide.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Attrition RH API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenu:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation_guide.html">Guide d’Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Documentation Technique du Modèle de Prédiction d’Attrition RH</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#objectif-du-modele">1. Objectif du Modèle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#source-et-preparation-des-donnees">2. Source et Préparation des Données</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#source-des-donnees">2.1. Source des Données</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#preparation-des-donnees-avant-entrainement">2.2. Préparation des Données Avant Entraînement</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#features-utilisees-par-le-modele">3. Features Utilisées par le Modèle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#algorithme-et-configuration-du-modele">4. Algorithme et Configuration du Modèle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metriques-de-performance-sur-le-jeu-de-test">5. Métriques de Performance (sur le Jeu de Test)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#procedure-de-re-entrainement">7. Procédure de Ré-entraînement</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#considerations-de-maintenance-et-monitoring">8. Considérations de Maintenance et Monitoring</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#architecture-du-projet">9. Architecture du Projet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#justification-des-choix-techniques">10. Justification des Choix Techniques</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api_usage_examples.html">Exemples d’Utilisation de l’API de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Guide de Contribution au Projet d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Attrition RH API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Documentation Technique du Modèle de Prédiction d’Attrition RH</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/model_documentation.md.txt" rel="nofollow"> Afficher la source de la page</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="documentation-technique-du-modele-de-prediction-d-attrition-rh">
+<h1>Documentation Technique du Modèle de Prédiction d’Attrition RH<a class="headerlink" href="#documentation-technique-du-modele-de-prediction-d-attrition-rh" title="Lien vers cette rubrique"></a></h1>
+<section id="objectif-du-modele">
+<h2>1. Objectif du Modèle<a class="headerlink" href="#objectif-du-modele" title="Lien vers cette rubrique"></a></h2>
+<p>Ce modèle de Machine Learning a pour objectif de prédire la probabilité qu’un employé quitte volontairement l’entreprise (attrition). Il vise à identifier les employés à risque afin de permettre des actions proactives de rétention.</p>
+</section>
+<section id="source-et-preparation-des-donnees">
+<h2>2. Source et Préparation des Données<a class="headerlink" href="#source-et-preparation-des-donnees" title="Lien vers cette rubrique"></a></h2>
+<section id="source-des-donnees">
+<h3>2.1. Source des Données<a class="headerlink" href="#source-des-donnees" title="Lien vers cette rubrique"></a></h3>
+<p>Les données utilisées pour l’entraînement et l’évaluation du modèle proviennent de la table <code class="docutils literal notranslate"><span class="pre">employees</span></code> de la base de données PostgreSQL du projet.
+Initialement, ces données ont été consolidées à partir de trois fichiers CSV : <code class="docutils literal notranslate"><span class="pre">extrait_sirh.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">extrait_eval.csv</span></code>, et <code class="docutils literal notranslate"><span class="pre">extrait_sondage.csv</span></code>.</p>
+</section>
+<section id="preparation-des-donnees-avant-entrainement">
+<h3>2.2. Préparation des Données Avant Entraînement<a class="headerlink" href="#preparation-des-donnees-avant-entrainement" title="Lien vers cette rubrique"></a></h3>
+<p>Avant d’être stockées dans la base de données et utilisées par la pipeline d’entraînement Scikit-learn, les données brutes subissent les transformations suivantes (principalement via les scripts <code class="docutils literal notranslate"><span class="pre">src/data_processing/load_data.py</span></code> et <code class="docutils literal notranslate"><span class="pre">src/data_processing/preprocess.py</span></code> lors du peuplement de la base) :</p>
+<ul class="simple">
+<li><p>Fusion des différentes sources de données.</p></li>
+<li><p>Création de la clé <code class="docutils literal notranslate"><span class="pre">id_employee</span></code> (si nécessaire, à partir de <code class="docutils literal notranslate"><span class="pre">eval_number</span></code>).</p></li>
+<li><p>Nettoyage des données :</p>
+<ul>
+<li><p>Conversion de la variable cible <code class="docutils literal notranslate"><span class="pre">a_quitte_l_entreprise</span></code> en format numérique (<code class="docutils literal notranslate"><span class="pre">0</span></code> pour Non, <code class="docutils literal notranslate"><span class="pre">1</span></code> pour Oui).</p></li>
+<li><p>Conversion de la colonne <code class="docutils literal notranslate"><span class="pre">augmentation_salaire_precedente</span></code> (ex: « XX % ») en valeur numérique (float).</p></li>
+<li><p>Suppression des colonnes identifiées comme non pertinentes ou redondantes avant le feature engineering (ex: <code class="docutils literal notranslate"><span class="pre">eval_number</span></code> après utilisation).</p></li>
+<li><p>Gestion des doublons.</p></li>
+</ul>
+</li>
+<li><p>Mappage des variables binaires textuelles en format numérique (ex: <code class="docutils literal notranslate"><span class="pre">genre</span></code>, <code class="docutils literal notranslate"><span class="pre">heure_supplementaires</span></code>).</p></li>
+<li><p>(Optionnel) Création de features dérivées (ex: <code class="docutils literal notranslate"><span class="pre">satisfaction_moyenne</span></code> si vous l’avez implémentée et stockée).</p></li>
+</ul>
+</section>
+</section>
+<section id="features-utilisees-par-le-modele">
+<h2>3. Features Utilisées par le Modèle<a class="headerlink" href="#features-utilisees-par-le-modele" title="Lien vers cette rubrique"></a></h2>
+<p>Le modèle final est entraîné sur les features suivantes (après les étapes de préparation ci-dessus et avant le préprocessing Scikit-learn comme le scaling ou le one-hot encoding) :</p>
+<ul class="simple">
+<li><p><strong>Variables Numériques (destinées au Scaling) :</strong></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">age</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">revenu_mensuel</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nombre_experiences_precedentes</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">annees_dans_l_entreprise</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">satisfaction_employee_environnement</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">note_evaluation_precedente</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">satisfaction_employee_nature_travail</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">satisfaction_employee_equipe</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">satisfaction_employee_equilibre_pro_perso</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">note_evaluation_actuelle</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">augementation_salaire_precedente</span></code> (numérique)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nombre_participation_pee</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">nb_formations_suivies</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">distance_domicile_travail</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">annees_depuis_la_derniere_promotion</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Variables Catégorielles Binaires (mappées en 0/1 avant préprocesseur) :</strong></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">genre</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">heure_supplementaires</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Variables Catégorielles Ordinales (destinées à <code class="docutils literal notranslate"><span class="pre">OrdinalEncoder</span></code>) :</strong></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">frequence_deplacement</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>Variables Catégorielles Nominales (destinées à <code class="docutils literal notranslate"><span class="pre">OneHotEncoder</span></code> avec <code class="docutils literal notranslate"><span class="pre">drop='first'</span></code>) :</strong></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">statut_marital</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">departement</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">poste</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">niveau_education</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">domaine_etude</span></code></p></li>
+</ul>
+</li>
+</ul>
+<p><em>(Note : La variable <code class="docutils literal notranslate"><span class="pre">id_employee</span></code> et les dates de métadonnées comme <code class="docutils literal notranslate"><span class="pre">date_creation_enregistrement</span></code> ne sont PAS utilisées comme features pour l’entraînement.)</em></p>
+</section>
+<section id="algorithme-et-configuration-du-modele">
+<h2>4. Algorithme et Configuration du Modèle<a class="headerlink" href="#algorithme-et-configuration-du-modele" title="Lien vers cette rubrique"></a></h2>
+<ul class="simple">
+<li><p><strong>Algorithme Utilisé :</strong> Régression Logistique (via <code class="docutils literal notranslate"><span class="pre">sklearn.linear_model.LogisticRegression</span></code>).</p></li>
+<li><p><strong>Motivation (brève) :</strong> Choisi pour sa simplicité, son interprétabilité et ses bonnes performances sur les problèmes de classification binaire, surtout après un bon preprocessing des features. C’est un bon point de départ.</p></li>
+<li><p><strong>Hyperparamètres Clés :</strong></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">random_state=42</span></code> (pour la reproductibilité).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">class_weight='balanced'</span></code> (pour aider à gérer le déséquilibre des classes dans la variable cible).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_iter=1000</span></code> (pour assurer la convergence).</p></li>
+<li><p><em>(Autres hyperparamètres importants si vous les avez modifiés)</em>.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="metriques-de-performance-sur-le-jeu-de-test">
+<h2>5. Métriques de Performance (sur le Jeu de Test)<a class="headerlink" href="#metriques-de-performance-sur-le-jeu-de-test" title="Lien vers cette rubrique"></a></h2>
+<p>Les performances du modèle sont évaluées sur un jeu de test mis de côté (20% des données). Voici les résultats obtenus lors du dernier entraînement :</p>
+<p><em>(ICI, copiez-collez la sortie de la Matrice de Confusion et du Rapport de Classification de votre script <code class="docutils literal notranslate"><span class="pre">train_model.py</span></code>)</em></p>
+<ul>
+<li><p><strong>Matrice de Confusion :</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Exemple</span>
+<span class="p">[[</span><span class="mi">194</span>  <span class="mi">53</span><span class="p">]</span>
+<span class="p">[</span> <span class="mi">13</span>  <span class="mi">34</span><span class="p">]]</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Rapport de Classification :</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Exemple</span>
+              <span class="n">precision</span>    <span class="n">recall</span>  <span class="n">f1</span><span class="o">-</span><span class="n">score</span>   <span class="n">support</span>
+
+         <span class="n">Non</span>       <span class="mf">0.94</span>      <span class="mf">0.79</span>      <span class="mf">0.85</span>       <span class="mi">247</span>
+         <span class="n">Oui</span>       <span class="mf">0.39</span>      <span class="mf">0.72</span>      <span class="mf">0.51</span>        <span class="mi">47</span>
+
+    <span class="n">accuracy</span>                           <span class="mf">0.78</span>       <span class="mi">294</span>
+   <span class="n">macro</span> <span class="n">avg</span>       <span class="mf">0.66</span>      <span class="mf">0.75</span>      <span class="mf">0.68</span>       <span class="mi">294</span>
+<span class="n">weighted</span> <span class="n">avg</span>       <span class="mf">0.85</span>      <span class="mf">0.78</span>      <span class="mf">0.80</span>       <span class="mi">294</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="procedure-de-re-entrainement">
+<h2>7. Procédure de Ré-entraînement<a class="headerlink" href="#procedure-de-re-entrainement" title="Lien vers cette rubrique"></a></h2>
+<p>Pour ré-entraîner le modèle (par exemple, si de nouvelles données sont disponibles dans la table <code class="docutils literal notranslate"><span class="pre">employees</span></code>) :</p>
+<ol class="arabic">
+<li><p>Assurez-vous que l’environnement Poetry est actif (<code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">shell</span></code>).</p></li>
+<li><p>Exécutez le script d’entraînement :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>-m<span class="w"> </span>src.modeling.train_model
+</pre></div>
+</div>
+</li>
+<li><p>Le nouveau modèle (<code class="docutils literal notranslate"><span class="pre">.joblib</span></code>) sera sauvegardé dans le dossier <code class="docutils literal notranslate"><span class="pre">models/</span></code>, écrasant l’ancien.</p></li>
+<li><p>Si l’API est déployée, il faudra redéployer l’application avec le nouveau fichier modèle.</p></li>
+</ol>
+</section>
+<section id="considerations-de-maintenance-et-monitoring">
+<h2>8. Considérations de Maintenance et Monitoring<a class="headerlink" href="#considerations-de-maintenance-et-monitoring" title="Lien vers cette rubrique"></a></h2>
+<ul class="simple">
+<li><p><strong>Monitoring des Données d’Entrée :</strong> Surveiller la distribution des données reçues par l’API pour détecter une éventuelle dérive par rapport aux données d’entraînement.</p></li>
+<li><p><strong>Monitoring des Performances :</strong> Si possible, suivre la performance réelle du modèle sur les nouvelles prédictions (nécessiterait un feedback sur les départs réels).</p></li>
+<li><p><strong>Ré-entraînement Périodique :</strong> Envisager un ré-entraînement régulier (ex: trimestriel, semestriel) avec des données fraîches pour maintenir la pertinence du modèle.</p></li>
+</ul>
+</section>
+<section id="architecture-du-projet">
+<h2>9. Architecture du Projet<a class="headerlink" href="#architecture-du-projet" title="Lien vers cette rubrique"></a></h2>
+<p>Le projet est structuré autour de plusieurs composants clés qui interagissent pour fournir la fonctionnalité de prédiction d’attrition :</p>
+<ol class="arabic simple">
+<li><p><strong>Sources de Données Brutes :</strong></p>
+<ul class="simple">
+<li><p>Initialement, les données proviennent de trois fichiers CSV (<code class="docutils literal notranslate"><span class="pre">extrait_sirh.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">extrait_eval.csv</span></code>, <code class="docutils literal notranslate"><span class="pre">extrait_sondage.csv</span></code>).</p></li>
+</ul>
+</li>
+<li><p><strong>Base de Données (PostgreSQL) :</strong></p>
+<ul class="simple">
+<li><p>Un service PostgreSQL (géré localement via Docker Compose) stocke :</p>
+<ul>
+<li><p>La table <code class="docutils literal notranslate"><span class="pre">employees</span></code> : Contient les données fusionnées, nettoyées et prétraitées (mappages binaires, conversion « XX % ») prêtes pour l’entraînement du modèle et la consultation. Elle est peuplée via le script <code class="docutils literal notranslate"><span class="pre">scripts/populate_employees_table.py</span></code>.</p></li>
+<li><p>La table <code class="docutils literal notranslate"><span class="pre">api_prediction_logs</span></code> : Enregistre les requêtes envoyées à l’API et les prédictions retournées.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>Préparation des Données pour l’Entraînement (<code class="docutils literal notranslate"><span class="pre">src/data_processing/</span></code>) :</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">load_data.py</span></code> : Charge les données depuis la table <code class="docutils literal notranslate"><span class="pre">employees</span></code> de PostgreSQL vers un DataFrame Pandas.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">preprocess.py</span></code> : Contient les fonctions pour les transformations finales avant l’application du préprocesseur Scikit-learn (ex: <code class="docutils literal notranslate"><span class="pre">create_features</span></code>). Les fonctions <code class="docutils literal notranslate"><span class="pre">clean_data</span></code> et <code class="docutils literal notranslate"><span class="pre">map_binary_features</span></code> sont principalement utilisées pour la préparation des données <em>avant</em> leur insertion en base.</p></li>
+</ul>
+</li>
+<li><p><strong>Entraînement du Modèle (<code class="docutils literal notranslate"><span class="pre">src/modeling/train_model.py</span></code>) :</strong></p>
+<ul class="simple">
+<li><p>Ce script orchestre le chargement des données depuis la BDD.</p></li>
+<li><p>Il sépare les données en ensembles d’entraînement et de test.</p></li>
+<li><p>Il construit et ajuste (<code class="docutils literal notranslate"><span class="pre">fit</span></code>) une <code class="docutils literal notranslate"><span class="pre">Pipeline</span></code> Scikit-learn qui inclut :</p>
+<ul>
+<li><p>Un <code class="docutils literal notranslate"><span class="pre">ColumnTransformer</span></code> (défini dans <code class="docutils literal notranslate"><span class="pre">preprocess.py</span></code>) pour le scaling des numériques, l’encodage One-Hot des catégorielles nominales, et l’encodage ordinal des catégorielles ordinales.</p></li>
+<li><p>Le classifieur (ex: <code class="docutils literal notranslate"><span class="pre">LogisticRegression</span></code>).</p></li>
+</ul>
+</li>
+<li><p>Il évalue le modèle et sauvegarde la pipeline entraînée dans <code class="docutils literal notranslate"><span class="pre">models/attrition_model.joblib</span></code>.</p></li>
+</ul>
+</li>
+<li><p><strong>API de Prédiction (<code class="docutils literal notranslate"><span class="pre">src/api/</span></code>) :</strong></p>
+<ul class="simple">
+<li><p>Construite avec FastAPI (<code class="docutils literal notranslate"><span class="pre">main.py</span></code>).</p></li>
+<li><p>Définit les schémas d’entrée/sortie avec Pydantic (<code class="docutils literal notranslate"><span class="pre">schemas.py</span></code>).</p></li>
+<li><p>L’endpoint <code class="docutils literal notranslate"><span class="pre">/predict</span></code> (et <code class="docutils literal notranslate"><span class="pre">/predict_bulk</span></code>) :</p>
+<ul>
+<li><p>Reçoit les données brutes de l’employé.</p></li>
+<li><p>Appelle la fonction <code class="docutils literal notranslate"><span class="pre">predict_attrition</span></code> de <code class="docutils literal notranslate"><span class="pre">src/modeling/predict.py</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">predict_attrition</span></code> applique les transformations initiales nécessaires (celles de <code class="docutils literal notranslate"><span class="pre">clean_data</span></code>, <code class="docutils literal notranslate"><span class="pre">map_binary_features</span></code>, <code class="docutils literal notranslate"><span class="pre">create_features</span></code> sur les données brutes) puis utilise la <code class="docutils literal notranslate"><span class="pre">Pipeline</span></code> Scikit-learn chargée pour faire la prédiction.</p></li>
+<li><p>Enregistre l’input et l’output dans la table <code class="docutils literal notranslate"><span class="pre">api_prediction_logs</span></code> via SQLAlchemy.</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>Conteneurisation (Docker) :</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Dockerfile</span></code> : Décrit comment construire l’image de l’API FastAPI pour le déploiement.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docker-compose.yml</span></code> : Utilisé pour lancer et gérer le service PostgreSQL localement.</p></li>
+</ul>
+</li>
+<li><p><strong>Gestion des Dépendances (Poetry) :</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> et <code class="docutils literal notranslate"><span class="pre">poetry.lock</span></code> gèrent les dépendances Python et l’environnement virtuel.</p></li>
+</ul>
+</li>
+<li><p><strong>Intégration Continue (GitHub Actions) :</strong></p>
+<ul class="simple">
+<li><p>Le fichier <code class="docutils literal notranslate"><span class="pre">.github/workflows/ci.yml</span></code> automatise les linters et les tests à chaque push/pull request.</p></li>
+</ul>
+</li>
+<li><p><strong>Déploiement (Hugging Face Spaces) :</strong></p>
+<ul class="simple">
+<li><p>L’API conteneurisée est déployée sur Hugging Face Spaces.</p></li>
+</ul>
+</li>
+</ol>
+<p><em>(Optionnel : Vous pourriez insérer ici un schéma simplifié si vous en avez un, même textuel, ou un lien vers une image hébergée)</em></p>
+</section>
+<section id="justification-des-choix-techniques">
+<h2>10. Justification des Choix Techniques<a class="headerlink" href="#justification-des-choix-techniques" title="Lien vers cette rubrique"></a></h2>
+<p>Les principaux choix technologiques pour ce projet ont été faits pour répondre aux besoins de développement, de déploiement et de maintenabilité :</p>
+<ul class="simple">
+<li><p><strong>Python :</strong> Langage de prédilection pour la Data Science et le Machine Learning grâce à son écosystème riche (Pandas, Scikit-learn, etc.).</p></li>
+<li><p><strong>Pandas :</strong> Pour la manipulation et l’analyse efficaces des données tabulaires.</p></li>
+<li><p><strong>Scikit-learn :</strong> Pour la construction de la pipeline de preprocessing et l’entraînement du modèle de classification.</p></li>
+<li><p><strong>Poetry :</strong> Pour une gestion moderne et robuste des dépendances Python, assurant la reproductibilité des environnements.</p></li>
+<li><p><strong>FastAPI :</strong> Framework web Python choisi pour sa haute performance, sa facilité d’utilisation, la validation des données intégrée via Pydantic, et la génération automatique de documentation API (Swagger UI/OpenAPI). Ses capacités asynchrones sont également un atout pour des API réactives.</p></li>
+<li><p><strong>Pydantic :</strong> Utilisé par FastAPI pour la validation des types de données des requêtes et des réponses, garantissant la robustesse des échanges avec l’API.</p></li>
+<li><p><strong>PostgreSQL :</strong> Système de gestion de base de données relationnelle open-source, puissant, fiable et bien adapté pour stocker les données structurées du projet et les logs de prédiction. Le support du type <code class="docutils literal notranslate"><span class="pre">JSONB</span></code> est utile pour stocker les inputs bruts de l’API.</p></li>
+<li><p><strong>SQLAlchemy :</strong> ORM Python utilisé pour interagir avec la base de données PostgreSQL de manière plus pythonique et pour faciliter la définition des modèles de table et les migrations de schéma (bien que nous n’ayons pas encore abordé les migrations).</p></li>
+<li><p><strong>Docker &amp; Docker Compose :</strong> Pour la conteneurisation. Docker permet d’empaqueter l’API FastAPI et ses dépendances pour un déploiement cohérent. Docker Compose simplifie la gestion du service PostgreSQL en développement local.</p></li>
+<li><p><strong>Hugging Face Spaces :</strong> Plateforme choisie pour sa simplicité de déploiement et d’hébergement gratuit pour les applications et API liées au Machine Learning, avec une bonne intégration Git et Docker.</p></li>
+<li><p><strong>GitHub &amp; GitHub Actions :</strong> Pour la gestion de version du code source et la mise en place d’un pipeline d’intégration continue (CI) afin d’automatiser les tests et les vérifications de qualité du code.</p></li>
+<li><p><strong>Pytest :</strong> Framework de test pour Python, utilisé pour écrire des tests unitaires et fonctionnels afin d’assurer la fiabilité du code.</p></li>
+<li><p><strong>Ruff / Black :</strong> Outils de linting et de formatage pour maintenir une haute qualité et une cohérence du style de code.</p></li>
+</ul>
+<p>Ces outils ont été choisis pour leur popularité, leur maturité, leur bonne documentation et leur adéquation avec les objectifs d’un projet MLOps moderne.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
+        <a href="installation_guide.html" class="btn btn-neutral float-left" title="Guide d’Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Précédent</a>
+        <a href="api_usage_examples.html" class="btn btn-neutral float-right" title="Exemples d’Utilisation de l’API de Prédiction d’Attrition RH" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Cyrille ELIE.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

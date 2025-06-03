@@ -1,0 +1,301 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guide de Contribution au Projet d’Attrition RH &mdash; Documentation Attrition RH API v0.2.1</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=44cc1bf8"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/translations.js?v=e6b791cb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Recherche" href="search.html" />
+    <link rel="next" title="API Reference" href="autoapi/index.html" />
+    <link rel="prev" title="Exemples d’Utilisation de l’API de Prédiction d’Attrition RH" href="api_usage_examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Attrition RH API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenu:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation_guide.html">Guide d’Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_documentation.html">Documentation Technique du Modèle de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_usage_examples.html">Exemples d’Utilisation de l’API de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Guide de Contribution au Projet d’Attrition RH</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#comment-commencer">🚀 Comment Commencer ?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#workflow-de-developpement">🛠️ Workflow de Développement</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#branches">1. Branches</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#commits">2. Commits</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qualite-du-code">3. Qualité du Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tests">4. Tests</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#processus-de-pull-request-pr">🔄 Processus de Pull Request (PR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rapporter-des-bugs">🐞 Rapporter des Bugs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#proposer-des-ameliorations">✨ Proposer des Améliorations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#questions">❓ Questions ?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Attrition RH API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Guide de Contribution au Projet d’Attrition RH</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/contributing.md.txt" rel="nofollow"> Afficher la source de la page</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="guide-de-contribution-au-projet-d-attrition-rh">
+<h1>Guide de Contribution au Projet d’Attrition RH<a class="headerlink" href="#guide-de-contribution-au-projet-d-attrition-rh" title="Lien vers cette rubrique"></a></h1>
+<p>Nous vous remercions de l’intérêt que vous portez à ce projet et de votre souhait d’y contribuer ! Ce guide a pour but de vous aider à comprendre comment contribuer de manière efficace.</p>
+<section id="comment-commencer">
+<h2>🚀 Comment Commencer ?<a class="headerlink" href="#comment-commencer" title="Lien vers cette rubrique"></a></h2>
+<ol class="arabic">
+<li><p><strong>Forker &amp; Cloner (si vous n’êtes pas un collaborateur direct) :</strong></p>
+<ul>
+<li><p>Si vous êtes un contributeur externe, « forkez » d’abord le dépôt, puis clonez votre fork.</p></li>
+<li><p>Si vous êtes un collaborateur direct, clonez simplement le dépôt :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span><span class="o">[</span>URL_DU_REPO_GITHUB<span class="o">]</span>
+<span class="nb">cd</span><span class="w"> </span>nom-du-dossier-projet
+</pre></div>
+</div>
+</li>
+</ul>
+</li>
+<li><p><strong>Installer Poetry :</strong>
+Ce projet utilise <a class="reference external" href="https://python-poetry.org/">Poetry</a> pour la gestion des dépendances et des environnements virtuels. Suivez les <a class="reference external" href="https://python-poetry.org/docs/#installation">instructions d’installation officielles</a>.</p></li>
+<li><p><strong>Installer les Dépendances du Projet :</strong>
+Une fois Poetry installé, à la racine du projet :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>install
+</pre></div>
+</div>
+<p>Cela créera un environnement virtuel et installera toutes les dépendances nécessaires (y compris celles de développement).</p>
+</li>
+<li><p><strong>Activer l’Environnement Virtuel :</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>shell
+</pre></div>
+</div>
+</li>
+<li><p><strong>Configurer les Variables d’Environnement (Base de Données) :</strong></p>
+<ul>
+<li><p>Copiez le fichier d’exemple <code class="docutils literal notranslate"><span class="pre">.env.example</span></code> en <code class="docutils literal notranslate"><span class="pre">.env</span></code> :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>cp<span class="w"> </span>.env.example<span class="w"> </span>.env
+</pre></div>
+</div>
+</li>
+<li><p>Modifiez le fichier <code class="docutils literal notranslate"><span class="pre">.env</span></code> avec vos identifiants pour la base de données PostgreSQL locale (voir <code class="docutils literal notranslate"><span class="pre">README.md</span></code> pour plus de détails). Ce fichier est ignoré par Git.</p></li>
+</ul>
+</li>
+<li><p><strong>Démarrer la Base de Données Locale (si nécessaire) :</strong>
+Si vous travaillez sur des aspects nécessitant la base de données :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker-compose<span class="w"> </span>up<span class="w"> </span>-d
+</pre></div>
+</div>
+<p>N’oubliez pas d’initialiser les tables (<code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">run</span> <span class="pre">python</span> <span class="pre">-m</span> <span class="pre">src.database.init_db</span></code>) et de peupler les données (<code class="docutils literal notranslate"><span class="pre">poetry</span> <span class="pre">run</span> <span class="pre">python</span> <span class="pre">-m</span> <span class="pre">scripts.populate_employees_table</span></code>) si c’est votre première configuration.</p>
+</li>
+</ol>
+</section>
+<section id="workflow-de-developpement">
+<h2>🛠️ Workflow de Développement<a class="headerlink" href="#workflow-de-developpement" title="Lien vers cette rubrique"></a></h2>
+<p>Nous suivons un workflow basé sur Git pour assurer la qualité et la cohérence du code.</p>
+<section id="branches">
+<h3>1. Branches<a class="headerlink" href="#branches" title="Lien vers cette rubrique"></a></h3>
+<ul>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">main</span></code></strong> : Contient la version la plus stable et déployée. Aucun push direct n’est autorisé. Les modifications arrivent via des Pull Requests depuis <code class="docutils literal notranslate"><span class="pre">develop</span></code> après validation.</p></li>
+<li><p><strong><code class="docutils literal notranslate"><span class="pre">develop</span></code></strong> : Branche principale d’intégration. Toutes les nouvelles fonctionnalités et corrections sont fusionnées ici avant de passer sur <code class="docutils literal notranslate"><span class="pre">main</span></code>. Aucun push direct n’est autorisé ; passez par une Pull Request.</p></li>
+<li><p><strong>Branches de Fonctionnalités/Corrections :</strong></p>
+<ul class="simple">
+<li><p>Toujours créer une nouvelle branche à partir de la dernière version de <code class="docutils literal notranslate"><span class="pre">develop</span></code>.</p></li>
+<li><p>Utilisez une convention de nommage claire :</p>
+<ul>
+<li><p>Pour les nouvelles fonctionnalités : <code class="docutils literal notranslate"><span class="pre">feature/nom-court-de-la-feature</span></code> (ex: <code class="docutils literal notranslate"><span class="pre">feature/api-logging</span></code>)</p></li>
+<li><p>Pour les corrections de bugs : <code class="docutils literal notranslate"><span class="pre">fix/description-bug</span></code> (ex: <code class="docutils literal notranslate"><span class="pre">fix/prediction-endpoint-500-error</span></code>)</p></li>
+<li><p>Pour la documentation : <code class="docutils literal notranslate"><span class="pre">docs/sujet-documentation</span></code> (ex: <code class="docutils literal notranslate"><span class="pre">docs/update-contributing-guide</span></code>)</p></li>
+<li><p>Pour les tâches diverses : <code class="docutils literal notranslate"><span class="pre">chore/description-tache</span></code> (ex: <code class="docutils literal notranslate"><span class="pre">chore/upgrade-dependencies</span></code>)</p></li>
+</ul>
+</li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>checkout<span class="w"> </span>develop
+git<span class="w"> </span>pull<span class="w"> </span>origin<span class="w"> </span>develop
+git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span>feature/ma-nouvelle-feature
+</pre></div>
+</div>
+</li>
+</ul>
+</section>
+<section id="commits">
+<h3>2. Commits<a class="headerlink" href="#commits" title="Lien vers cette rubrique"></a></h3>
+<ul class="simple">
+<li><p>Rédigez des messages de commit clairs, concis et en français (ou en anglais si c’est la convention du projet).</p></li>
+<li><p>Utilisez les préfixes de <strong>Conventional Commits</strong> pour indiquer la nature du commit :</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">feat:</span></code> (nouvelle fonctionnalité)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fix:</span></code> (correction de bug)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">docs:</span></code> (changements dans la documentation)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">style:</span></code> (formatage, points-virgules manquants, etc. ; pas de changement de code)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">refactor:</span></code> (refonte du code qui ne corrige pas de bug ni n’ajoute de fonctionnalité)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">test:</span></code> (ajout ou correction de tests)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">chore:</span></code> (mise à jour de tâches de build, configuration, etc.)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ci:</span></code> (changements dans les fichiers et scripts de CI/CD)</p></li>
+</ul>
+</li>
+<li><p>Essayez de faire des commits atomiques (un changement logique par commit).</p></li>
+</ul>
+</section>
+<section id="qualite-du-code">
+<h3>3. Qualité du Code<a class="headerlink" href="#qualite-du-code" title="Lien vers cette rubrique"></a></h3>
+<ul>
+<li><p><strong>Formatage :</strong> Nous utilisons <strong>Black</strong> pour le formatage automatique du code. Avant de commiter, lancez :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>run<span class="w"> </span>black<span class="w"> </span>.
+</pre></div>
+</div>
+</li>
+<li><p><strong>Linting :</strong> Nous utilisons <strong>Ruff</strong> pour le linting (détection d’erreurs, de code smells, et application de règles de style). Avant de commiter, lancez :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>check<span class="w"> </span>.<span class="w"> </span>--fix<span class="w"> </span><span class="c1"># Pour corriger automatiquement ce qui peut l&#39;être</span>
+poetry<span class="w"> </span>run<span class="w"> </span>ruff<span class="w"> </span>format<span class="w"> </span>.<span class="w"> </span><span class="c1"># Ruff peut aussi remplacer Black pour le formatage</span>
+</pre></div>
+</div>
+<p>(Note: Le workflow CI vérifiera le formatage avec <code class="docutils literal notranslate"><span class="pre">black</span> <span class="pre">--check</span> <span class="pre">.</span></code> et le linting avec <code class="docutils literal notranslate"><span class="pre">ruff</span> <span class="pre">check</span> <span class="pre">.</span></code>)</p>
+</li>
+</ul>
+</section>
+<section id="tests">
+<h3>4. Tests<a class="headerlink" href="#tests" title="Lien vers cette rubrique"></a></h3>
+<ul>
+<li><p>Toute nouvelle fonctionnalité ou correction de bug doit être accompagnée de <strong>tests pertinents</strong> (unitaires, fonctionnels, d’intégration).</p></li>
+<li><p>Assurez-vous que tous les tests passent localement avant de pousser votre code :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>run<span class="w"> </span>pytest
+</pre></div>
+</div>
+</li>
+<li><p>Vérifiez la couverture de test et essayez de la maintenir ou de l’augmenter :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>--cov<span class="o">=</span>src<span class="w"> </span>tests/
+</pre></div>
+</div>
+<p>(Note: Le workflow CI exécutera ces tests.)</p>
+</li>
+</ul>
+</section>
+</section>
+<section id="processus-de-pull-request-pr">
+<h2>🔄 Processus de Pull Request (PR)<a class="headerlink" href="#processus-de-pull-request-pr" title="Lien vers cette rubrique"></a></h2>
+<ol class="arabic">
+<li><p>Une fois votre travail terminé sur votre branche de fonctionnalité, poussez votre branche sur GitHub :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>push<span class="w"> </span>origin<span class="w"> </span>feature/ma-nouvelle-feature
+</pre></div>
+</div>
+</li>
+<li><p>Sur GitHub, créez une <strong>Pull Request</strong> de votre branche de fonctionnalité vers la branche <code class="docutils literal notranslate"><span class="pre">develop</span></code>.</p></li>
+<li><p>Donnez un <strong>titre clair</strong> et une <strong>description détaillée</strong> à votre PR, expliquant les changements apportés et pourquoi.</p></li>
+<li><p>Assurez-vous que tous les <strong>checks de la CI (GitHub Actions) passent</strong> sur votre PR (formatage, linting, tests).</p></li>
+<li><p>Si vous travaillez en équipe, assignez un ou plusieurs relecteurs.</p></li>
+<li><p>Une fois la PR approuvée et les checks de la CI au vert, elle peut être fusionnée dans <code class="docutils literal notranslate"><span class="pre">develop</span></code> par un mainteneur du projet. Privilégiez le « Squash and merge » pour garder un historique propre sur <code class="docutils literal notranslate"><span class="pre">develop</span></code>.</p></li>
+<li><p>Après la fusion, la branche de fonctionnalité peut être supprimée sur GitHub et localement.</p></li>
+</ol>
+</section>
+<section id="rapporter-des-bugs">
+<h2>🐞 Rapporter des Bugs<a class="headerlink" href="#rapporter-des-bugs" title="Lien vers cette rubrique"></a></h2>
+<ul class="simple">
+<li><p>Utilisez l’onglet <strong>« Issues »</strong> du dépôt GitHub pour signaler les bugs.</p></li>
+<li><p>Veuillez inclure autant d’informations que possible :</p>
+<ul>
+<li><p>Version du code (hash de commit ou tag).</p></li>
+<li><p>Étapes pour reproduire le bug.</p></li>
+<li><p>Comportement observé.</p></li>
+<li><p>Comportement attendu.</p></li>
+<li><p>Messages d’erreur complets et tracebacks.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="proposer-des-ameliorations">
+<h2>✨ Proposer des Améliorations<a class="headerlink" href="#proposer-des-ameliorations" title="Lien vers cette rubrique"></a></h2>
+<ul class="simple">
+<li><p>Les suggestions d’amélioration sont les bienvenues ! Veuillez ouvrir une <strong>« Issue »</strong> sur GitHub pour discuter de votre idée avant de commencer à développer.</p></li>
+</ul>
+</section>
+<section id="questions">
+<h2>❓ Questions ?<a class="headerlink" href="#questions" title="Lien vers cette rubrique"></a></h2>
+<p>Si vous avez des questions sur la contribution, n’hésitez pas à ouvrir une « Issue » pour en discuter.</p>
+<p>Merci pour votre contribution !</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
+        <a href="api_usage_examples.html" class="btn btn-neutral float-left" title="Exemples d’Utilisation de l’API de Prédiction d’Attrition RH" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Précédent</a>
+        <a href="autoapi/index.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Cyrille ELIE.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

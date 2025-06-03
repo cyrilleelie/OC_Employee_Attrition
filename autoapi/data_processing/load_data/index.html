@@ -1,0 +1,271 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="fr" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>data_processing.load_data &mdash; Documentation Attrition RH API v0.2.1</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=44cc1bf8"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../../_static/translations.js?v=e6b791cb"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Recherche" href="../../../search.html" />
+    <link rel="next" title="data_processing.preprocess" href="../preprocess/index.html" />
+    <link rel="prev" title="data_processing" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Attrition RH API
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Rechercher docs" aria-label="Rechercher docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenu:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation_guide.html">Guide d’Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_documentation.html">Documentation Technique du Modèle de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api_usage_examples.html">Exemples d’Utilisation de l’API de Prédiction d’Attrition RH</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Guide de Contribution au Projet d’Attrition RH</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../api/index.html">api</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../config/index.html">config</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../database/index.html">database</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../modeling/index.html">modeling</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">data_processing</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">data_processing.load_data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../preprocess/index.html">data_processing.preprocess</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Attrition RH API</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">data_processing</a></li>
+      <li class="breadcrumb-item active">data_processing.load_data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/data_processing/load_data/index.rst.txt" rel="nofollow"> Afficher la source de la page</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-data_processing.load_data">
+<span id="data-processing-load-data"></span><h1>data_processing.load_data<a class="headerlink" href="#module-data_processing.load_data" title="Lien vers cette rubrique"></a></h1>
+<p>Module pour le chargement et la préparation initiale des données.</p>
+<p>Fonctions pour charger les données brutes depuis des fichiers CSV, les fusionner, et préparer les clés de jointure. Fournit également des fonctions pour charger les données depuis une base de données PostgreSQL une fois peuplée.
+La fonction principale <cite>get_data</cite> sert d’interface pour obtenir les données pour le reste de l’application, typiquement pour l’entraînement du modèle.</p>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Lien vers cette rubrique"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#data_processing.load_data.logger" title="data_processing.load_data.logger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logger</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#data_processing.load_data.data_from_db" title="data_processing.load_data.data_from_db"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_from_db</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Lien vers cette rubrique"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#data_processing.load_data.load_data_from_csv" title="data_processing.load_data.load_data_from_csv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_data_from_csv</span></code></a>(→ pandas.DataFrame | None)</p></td>
+<td><p>Charge les données depuis un unique fichier CSV spécifié.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#data_processing.load_data.load_data_from_postgres" title="data_processing.load_data.load_data_from_postgres"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_data_from_postgres</span></code></a>(→ pandas.DataFrame)</p></td>
+<td><p>Charge l'intégralité des données de la table 'employees' depuis PostgreSQL</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#data_processing.load_data.get_data" title="data_processing.load_data.get_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_data</span></code></a>(→ pandas.DataFrame | None)</p></td>
+<td><p>Fonction principale pour obtenir le jeu de données pour l'application.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#data_processing.load_data.load_and_merge_csvs" title="data_processing.load_data.load_and_merge_csvs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_and_merge_csvs</span></code></a>(→ pandas.DataFrame | None)</p></td>
+<td><p>Charge les données depuis les trois fichiers CSV bruts (<cite>extrait_sirh.csv</cite>,</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Lien vers cette rubrique"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="data_processing.load_data.logger">
+<span class="sig-prename descclassname"><span class="pre">data_processing.load_data.</span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="reference internal" href="../../../_modules/data_processing/load_data.html#logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_processing.load_data.logger" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data_processing.load_data.load_data_from_csv">
+<span class="sig-prename descclassname"><span class="pre">data_processing.load_data.</span></span><span class="sig-name descname"><span class="pre">load_data_from_csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">config.PROCESSED_DATA_PATH</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/data_processing/load_data.html#load_data_from_csv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_processing.load_data.load_data_from_csv" title="Lien vers cette définition"></a></dt>
+<dd><p>Charge les données depuis un unique fichier CSV spécifié.</p>
+<p>Utilisé comme fonction de secours ou pour charger un dataset déjà traité et sauvegardé en CSV.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em><em>, </em><em>optional</em>) – Chemin vers le fichier CSV.
+Par défaut, utilise config.PROCESSED_DATA_PATH.</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>DataFrame Pandas contenant les données chargées,</dt><dd><p>ou None si le fichier n’est pas trouvé.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data_processing.load_data.load_data_from_postgres">
+<span class="sig-prename descclassname"><span class="pre">data_processing.load_data.</span></span><span class="sig-name descname"><span class="pre">load_data_from_postgres</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/data_processing/load_data.html#load_data_from_postgres"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_processing.load_data.load_data_from_postgres" title="Lien vers cette définition"></a></dt>
+<dd><p>Charge l’intégralité des données de la table “employees” depuis PostgreSQL
+dans un DataFrame Pandas.</p>
+<p>Utilise SQLAlchemy pour interagir avec la base de données configurée.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Renvoie<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>DataFrame Pandas contenant les données de la table “employees”.</dt><dd><p>Retourne un DataFrame vide en cas d’erreur ou si la table est vide.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data_processing.load_data.get_data">
+<span class="sig-prename descclassname"><span class="pre">data_processing.load_data.</span></span><span class="sig-name descname"><span class="pre">get_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'postgres'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/data_processing/load_data.html#get_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_processing.load_data.get_data" title="Lien vers cette définition"></a></dt>
+<dd><p>Fonction principale pour obtenir le jeu de données pour l’application.</p>
+<p>Sert d’interface pour charger les données soit depuis PostgreSQL (par défaut),
+soit depuis des fichiers CSV bruts (via <cite>load_and_merge_csvs</cite>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Paramètres<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>source</strong> (<em>str</em><em>, </em><em>optional</em>) – La source des données. Peut être « postgres » ou « csv ».
+Par défaut à « postgres ».</p>
+</dd>
+<dt class="field-even">Renvoie<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>DataFrame Pandas contenant les données, ou None si une</dt><dd><p>erreur majeure de chargement se produit (ex: CSV introuvables).
+Peut retourner un DataFrame vide si la source est vide (ex: table PG vide).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="data_processing.load_data.load_and_merge_csvs">
+<span class="sig-prename descclassname"><span class="pre">data_processing.load_data.</span></span><span class="sig-name descname"><span class="pre">load_and_merge_csvs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/data_processing/load_data.html#load_and_merge_csvs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_processing.load_data.load_and_merge_csvs" title="Lien vers cette définition"></a></dt>
+<dd><p>Charge les données depuis les trois fichiers CSV bruts (<cite>extrait_sirh.csv</cite>,
+<cite>extrait_eval.csv</cite>, <cite>extrait_sondage.csv</cite>), prépare les clés de jointure <cite>id_employee</cite>
+(notamment à partir de <cite>eval_number</cite> et <cite>code_sondage</cite>), et fusionne les DataFrames.</p>
+<p>Cette fonction est principalement utilisée pour le peuplement initial de la base de données.
+Elle s’assure que les <cite>id_employee</cite> sont traités comme des chaînes de caractères pour
+des fusions cohérentes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Renvoie<span class="colon">:</span></dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Un DataFrame fusionné contenant les données des trois sources,</dt><dd><p>ou None si une erreur critique se produit (ex: fichier introuvable,
+colonne clé de jointure manquante).</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Type renvoyé<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="data_processing.load_data.data_from_db">
+<span class="sig-prename descclassname"><span class="pre">data_processing.load_data.</span></span><span class="sig-name descname"><span class="pre">data_from_db</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/data_processing/load_data.html#data_from_db"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#data_processing.load_data.data_from_db" title="Lien vers cette définition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Pied de page">
+        <a href="../index.html" class="btn btn-neutral float-left" title="data_processing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Précédent</a>
+        <a href="../preprocess/index.html" class="btn btn-neutral float-right" title="data_processing.preprocess" accesskey="n" rel="next">Suivant <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Droits d'auteur 2025, Cyrille ELIE.</p>
+  </div>
+
+  Compilé avec <a href="https://www.sphinx-doc.org/">Sphinx</a> en utilisant un
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">thème</a>
+    fourni par <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
